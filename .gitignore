@@ -1,0 +1,3 @@
+# Ignore all files in the video folder
+# video/ (uncomment)
+.DS_Store
