@@ -1,1 +1,1 @@
-#numpy==1.0.0 (example)
+python==3.10.14 
