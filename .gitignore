@@ -1,4 +1,4 @@
 # Ignore all files in the video folder
 video/
-#papers/
+papers/
 .DS_Store
