@@ -2,3 +2,6 @@
 video/
 papers/
 .DS_Store
+src-gen/
+.env/
+__pycache__/
