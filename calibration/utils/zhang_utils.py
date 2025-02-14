@@ -508,16 +508,12 @@ def loss_func(x0, RT_all, images_corners, world_corners):
     
     return np.array(error_all_images)
 
-def saveCalibrationResults(output_folder, camera_name, intrinsic_params, extrinsic_params, distortion_params, mean_error_pre, mean_error_post):
+def saveCalibrationResults(output_folder, camera_name, intrinsic_params, distortion_params, mean_error_pre, mean_error_post):
     """
     Saves the calibration parameters in a JSON file.
     """
-    file_path = os.path.join(output_folder, f"{camera_name}_calibration.json")
+    file_path = os.path.join(output_folder, f"{camera_name}_intrinsic.json")
     timestamp = datetime.datetime.now()
-
-    # Prepare rotation and translation data for JSON serialization
-    rotation_data = [extrinsic[:3, :3].tolist() for extrinsic in extrinsic_params]
-    translation_data = [extrinsic[:3, 3].tolist() for extrinsic in extrinsic_params]
 
     calibration_data = {
         "Camera_ID": camera_name,
@@ -528,10 +524,6 @@ def saveCalibrationResults(output_folder, camera_name, intrinsic_params, extrins
             "u0": intrinsic_params[0, 2],
             "v0": intrinsic_params[1, 2],
         },
-        "extrinsic": {
-            "rotation": rotation_data,
-            "translation": translation_data
-        },
         "distortion": {
             "k1": distortion_params[0],
             "k2": distortion_params[1]
@@ -539,9 +531,6 @@ def saveCalibrationResults(output_folder, camera_name, intrinsic_params, extrins
         "meanError_preOpt": mean_error_pre,
         "meanError_postOpt": mean_error_post,
         "timestamp": timestamp.strftime('%Y-%m-%d %H:%M:%S')
-
-
-        
     }
 
     with open(file_path, 'w') as f:
