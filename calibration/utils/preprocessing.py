@@ -50,7 +50,7 @@ def extract_frames(video_paths, skip_frames, output_folder):
         print(f"Finished processing {video} and released video resources.")
 
 """
-Run the script: python3 extract_frames.py
+Run the script: python3 preprocessing.py
 """
 if __name__ == "__main__":
    

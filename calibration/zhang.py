@@ -18,9 +18,9 @@ Perform camera calibration using Zhang's method
     chessBoardSize (tuple): Number of inner corners in the chessboard
 """
 def zhang_calibaration(input_folder, checker_size=28, chessboard_size=(7,5)):
-    
+   
     name = os.path.basename(input_folder)
-    print(f"------------------ {name} ------------------")
+    print(f"---------------------- {name} ----------------------")
     print(f"Processing calibration for images in folder: {input_folder}")
 
     # Create output folder
@@ -41,7 +41,7 @@ def zhang_calibaration(input_folder, checker_size=28, chessboard_size=(7,5)):
     # Generate world corners based on the chessboard configuration
     w_corners = utils.getWorldCorners(chessboard_size, checker_size)
     
-    print("> Images Corners: ", imgs_corners.shape)
+    print("\n> Images Corners: ", imgs_corners.shape)
     print("> World Corners: ", w_corners.shape)
 
     # Calculate the homography matrix for images
@@ -51,23 +51,21 @@ def zhang_calibaration(input_folder, checker_size=28, chessboard_size=(7,5)):
     # Calculate B matrix from the homography matrices
     print("> Calculating B matrix")
     B = utils.getB(H_matrices)
-    print("\n- Estimated B: ", B)
+    print("- Estimated B: ", B)
 
     # Calculate A (intrinsic parameters) matrix for initialization    
     A_init = utils.getA(B)
     print("\n> Initialized A (intrinsic parameters): ", A_init)
 
     # Calculate rotation and translation matrices for all images
-    print("> Calculating all images and translation matrices (extrinsics parameters)")
+    print("\n> Calculating all images and translation matrices (extrinsics parameters)")
     RT_all = utils.getRotAndTrans(A_init, H_matrices)
     K_distortion_init = np.array([0,0])
     print("> Initialize the radial distortion parameters: ", K_distortion_init)
     
-    sys.exit(1)
-
     # Calculate the initial mean error and reprojection errors
     print("> Calculating initial mean error and reprojection error")
-    error_all_images, reprojected_points = utils.reprojectionRMSError(
+    mean_error_pre, reprojected_points = utils.reprojectionRMSError(
         A_init,
         K_distortion_init,
         RT_all,
@@ -75,14 +73,15 @@ def zhang_calibaration(input_folder, checker_size=28, chessboard_size=(7,5)):
         w_corners
     )
 
-    print("\n- Mean Error (before optimization): ", np.round(np.mean(error_all_images), decimals=3))
+    mean_error_pre = np.round(np.mean(mean_error_pre), decimals=6)
+    print("- Mean Error (before optimization): ", mean_error_pre)
 
     # Perform the optimization
     print("> Running Least Square Optimization")
     x0 = utils.extractParamFromA(A=A_init, K_distortion_init=K_distortion_init) # initial parameters
 
     res = scipy.optimize.least_squares(
-        fun=loss_func,
+        fun= utils.loss_func,
         x0=x0,
         method="lm",
         args=[RT_all, imgs_corners, w_corners],
@@ -91,23 +90,24 @@ def zhang_calibaration(input_folder, checker_size=28, chessboard_size=(7,5)):
     # Extract new camera parameters after optimization
     x1 = res.x
     A_new, K_distortion_new = utils.retrieveA(x1)
+    print("- Optimized A: ", A_new)
+    print("- Radial distortion parameters (after optimization): ", K_distortion_new)
 
+    # Recalculate errors after optimization
+    print("\n> Calculating Initial mean error and reprojection error")
+    mean_error_post, reprojected_points = utils.reprojectionRMSError(
+        A_new,
+        K_distortion_new,
+        RT_all,
+        imgs_corners,
+        w_corners
+    )
+    mean_error_post = np.round(np.mean(mean_error_post), decimals=6)
+    print("- Mean Error (after optimization): ", mean_error_post)
 
-    # print("\n>>>>>>>>>>>>>> AFTER OPTIMIZATION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-    # print("\n===== Optimized A matrix [Intrinsics Parameters]:======= \n", A_new)
-    # print("\n===== Radial distortion parameters after optimization :======= \n", K_distortion_new)
-
-    # print("\n>>>>>>>>>>>>> Calculating Initial mean error and reprojection error <<<<<<<<<<<<<<<<<<<<<")
-    # # Recalculate errors after optimization
-    # error_all_images, reprojected_points = reprojectionRMSError(A=A_new,
-    #                                                             K_distortion=K_distortion_new,
-    #                                                             RT_all=RT_all,
-    #                                                             images_corners=imgs_corners,
-    #                                                             world_corners=w_corners)
-    
-    # print("\nThe mean error after optimization is: ", np.round(np.mean(error_all_images), decimals=3))
-
-
+    # Save the calibration results
+    print("\n> Saving calibration results")
+    utils.saveCalibrationResults(output_folder, name, A_new, RT_all, K_distortion_new, mean_error_pre, mean_error_post)
 
 """
 Run the script: python3 zhang.py <video_paths> <skip_frames> <output_folder>
