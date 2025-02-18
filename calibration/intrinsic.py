@@ -112,7 +112,7 @@ def zhang_calibaration(input_folder, checker_size):
     utils.saveCalibrationResults(output_folder, name, A_new, K_distortion_new, mean_error_pre, mean_error_post)
 
 """
-Run the script: python3 intrinsic.py <video_paths> <skip_frames> <output_folder>
+Run the script: python3 intrinsic.py
 """
 if __name__ == "__main__":
 
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     SRC_GEN = parameters.SRC_GEN
 
     # Uncomment to test the calibration for a single folder
-    # folder_path = os.path.join(SRC_GEN, "out8F")
+    # folder_path = os.path.join(SRC_GEN, "out12F")
     # zhang_calibaration(folder_path, SQUARE_SIZE)
     # sys.exit(0)
 

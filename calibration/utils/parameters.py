@@ -12,8 +12,15 @@ VIDEO_PATHS = [
     ['./video/board/out13F.mp4', (7,5)],
 ]
 
+VIDEO_PATHS = [
+    ['./video/board/out12F.mp4', (7,5)],
+]
+
 SKIP_FRAMES = 25
-SRC_GEN = './src-gen'
 SQUARE_SIZE = 28 #mm
+
 OUT = "-gen"
 JSON_CHESSBOARD = "chessboard.json"
+SRC_GEN = './src-gen'
+SETUP = "./setup.json"
+LANDMARKS = "landmarks.json"
