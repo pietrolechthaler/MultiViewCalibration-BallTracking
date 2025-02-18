@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 import os
 import copy
+import utils.parameters as parameters
 
 def loadImages(folder):
     """
@@ -19,7 +20,7 @@ def loadImages(folder):
     """
 
     # List all files in the folder
-    files = os.listdir(folder)
+    files = [f for f in os.listdir(folder) if f.lower().endswith('.jpg')]
     images = []
     for filename in files:
         img_path = os.path.join(folder, filename)
@@ -56,17 +57,17 @@ def getImagesCorners(images, chessBoardSize, output_folder):
     for img in images:
         # Find the chessboard corners
         ret, corners = cv2.findChessboardCorners(image=img, patternSize=chessBoardSize)
-        
+
         # Corners detected
         if ret == True:
             # Reshape the corners into 2D and add them to the list
             img_corners = corners.reshape(-1, 2)
             output_corners.append(img_corners)
 
-        # Draw the corners on the image for visualization
-        drawCorners(img, img_corners, counter, output_folder)
-        counter += 1
-    
+            # Draw the corners on the image for visualization
+            drawCorners(img, img_corners, counter, output_folder)
+            counter += 1
+        
     return np.array(output_corners)
 
 
@@ -537,3 +538,23 @@ def saveCalibrationResults(output_folder, camera_name, intrinsic_params, distort
         json.dump(calibration_data, f, indent=4)
 
     print(f"- Calibration parameters saved in {file_path}")
+
+def read_chessboard_dimensions(folder_path):
+    """
+    Read the chessboard dimensions from a JSON file.
+    @params:
+        json_path (str): Path to the folder containing the json with chessboard dimensions.
+    @return:
+        tuple: Tuple containing the dimensions of the chessboard (rows,, columns)
+    """
+    # Load the JSON file
+    filename = parameters.JSON_CHESSBOARD
+    json_path = os.path.join(folder_path, filename)
+
+    with open(json_path, 'r') as json_file:
+        data = json.load(json_file)
+        
+    rows = data['chessboard_dimensions']['rows']
+    columns = data['chessboard_dimensions']['columns']
+
+    return (rows, columns)

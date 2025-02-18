@@ -3,7 +3,7 @@ Author: Pietro Lechthaler
 Description: This script performs camera calibration using Zhang's method.
 """
 import os
-import utils.zhang_utils as utils
+import utils.intrinsic_utils as utils
 from tqdm import tqdm
 import utils.parameters as parameters
 import sys
@@ -17,12 +17,15 @@ Perform camera calibration using Zhang's method
     checker_size (int): Size of the chessboard in millimiters
     chessBoardSize (tuple): Number of inner corners in the chessboard
 """
-def zhang_calibaration(input_folder, checker_size=28, chessboard_size=(7,5)):
-   
+def zhang_calibaration(input_folder, checker_size):
+    
     name = os.path.basename(input_folder)
     print(f"---------------------- {name} ----------------------")
     print(f"Processing calibration for images in folder: {input_folder}")
 
+    # Chessboard configuration
+    chessboard_size = utils.read_chessboard_dimensions(input_folder)
+    print(f"> Chessboard size: {chessboard_size}")
     # Create output folder
     out_name = name + parameters.OUT
 
@@ -58,7 +61,7 @@ def zhang_calibaration(input_folder, checker_size=28, chessboard_size=(7,5)):
     print("> Initialized A (intrinsic parameters):\n", A_init)
 
     # Calculate rotation and translation matrices for all images
-    print("\n> Calculating all images and translation matrices")
+    print("> Calculating all images and translation matrices")
     RT_all = utils.getRotAndTrans(A_init, H_matrices)
     K_distortion_init = np.array([0,0])
     print("> Initialize the radial distortion coefficients: ", K_distortion_init)
@@ -109,15 +112,19 @@ def zhang_calibaration(input_folder, checker_size=28, chessboard_size=(7,5)):
     utils.saveCalibrationResults(output_folder, name, A_new, K_distortion_new, mean_error_pre, mean_error_post)
 
 """
-Run the script: python3 zhang.py <video_paths> <skip_frames> <output_folder>
+Run the script: python3 intrinsic.py <video_paths> <skip_frames> <output_folder>
 """
 if __name__ == "__main__":
 
     # Parameters
-    CHESS_BOARD_SIZE = parameters.CHESS_BOARD_SIZE
-    CHECKER_SIZE = parameters.CHECKER_SIZE
+    SQUARE_SIZE = parameters.SQUARE_SIZE
     SRC_GEN = parameters.SRC_GEN
-    
+
+    # Uncomment to test the calibration for a single folder
+    # folder_path = os.path.join(SRC_GEN, "out8F")
+    # zhang_calibaration(folder_path, SQUARE_SIZE)
+    # sys.exit(0)
+
     # Check if the src-gen folder exists
     if not os.path.exists(SRC_GEN):
         print(f"Error: The folder {SRC_GEN} does not exist.")
@@ -129,4 +136,4 @@ if __name__ == "__main__":
 
         if os.path.isdir(folder_path):
             # Run the calibration for each subdirectory
-            zhang_calibaration(folder_path, CHECKER_SIZE, CHESS_BOARD_SIZE)
+            zhang_calibaration(folder_path, SQUARE_SIZE)
