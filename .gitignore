@@ -2,3 +2,11 @@
 video/
 papers/
 .DS_Store
+old code/
+tracking/yolov8m.pt
+tracking/yolo11n.pt
+tracking/prova_filtered.mp4
+tracking/out1_filtered.mp4
+tracking/tndataset/labelImg/
+tracking/tndataset/labelimg_env/
+tracking/datasets/
