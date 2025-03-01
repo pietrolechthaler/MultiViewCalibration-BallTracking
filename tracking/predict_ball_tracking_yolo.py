@@ -5,7 +5,7 @@ import cv2
 model = YOLO('runs/detect/train3/weights/best.pt')
 
 # Percorso del video di input
-input_video_path = '../video/out1.mp4'
+input_video_path = '../video/out3.mp4'
 cap = cv2.VideoCapture(input_video_path)
 
 # Ottieni le proprietà del video
@@ -14,7 +14,7 @@ frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 
 # Percorso del video di output
-output_video_path = 'detection/out1_detected.mp4'
+output_video_path = 'detection/out3_detected.mp4'
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec per MP4
 out = cv2.VideoWriter(output_video_path, fourcc, fps, (frame_width, frame_height))
 
