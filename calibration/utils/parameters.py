@@ -9,12 +9,13 @@ VIDEO_PATHS = [
     ['./video/board/out6F.mp4', (9,6)],
     ['./video/board/out7F.mp4', (7,5)],
     ['./video/board/out8F.mp4', (9,6)],
+    ['./video/board/out12F.mp4', (7,5)],
     ['./video/board/out13F.mp4', (7,5)],
 ]
 
-VIDEO_PATHS = [
-    ['./video/board/out12F.mp4', (7,5)],
-]
+# VIDEO_PATHS = [
+#     ['./video/board/out12F.mp4', (7,5)],
+# ]
 
 SKIP_FRAMES = 25
 SQUARE_SIZE = 28 #mm

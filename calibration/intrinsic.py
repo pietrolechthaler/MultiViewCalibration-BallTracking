@@ -38,7 +38,7 @@ def zhang_calibaration(input_folder, checker_size):
     # Load images as a list of Numpy arrays
     images = utils.loadImages(input_folder)
     
-    # Detect corners in all images
+    # Detect corners in all images, draw and save them
     imgs_corners = utils.getImagesCorners(images, chessboard_size, output_folder)
 
     # Generate world corners based on the chessboard configuration
@@ -61,13 +61,14 @@ def zhang_calibaration(input_folder, checker_size):
     print("> Initialized A (intrinsic parameters):\n", A_init)
 
     # Calculate rotation and translation matrices for all images
-    print("> Calculating all images and translation matrices")
+    print("> Calculating all rotation and translation from A")
     RT_all = utils.getRotAndTrans(A_init, H_matrices)
     K_distortion_init = np.array([0,0])
-    print("> Initialize the radial distortion coefficients: ", K_distortion_init)
+    print("> Initialize the distortion coefficients: ", K_distortion_init)
     
     # Calculate the initial mean error and reprojection errors
-    print("> Calculating initial mean error and reprojection error")
+    print("> Start optimization")
+    print("- Calculating initial mean error and reprojection error")
     mean_error_pre, reprojected_points = utils.reprojectionRMSError(
         A_init,
         K_distortion_init,
@@ -107,9 +108,19 @@ def zhang_calibaration(input_folder, checker_size):
     mean_error_post = np.round(np.mean(mean_error_post), decimals=6)
     print("- Mean Error (after optimization): ", mean_error_post)
 
+    A_final = x1[0]
+    kc_final = x1[1]
+
+    # FIXME: Save the calibration results
     # Save the calibration results
-    print("> Saving calibration results")
-    utils.saveCalibrationResults(output_folder, name, A_new, K_distortion_new, mean_error_pre, mean_error_post)
+    # print("> Saving calibration results")
+    # utils.saveCalibrationResults(output_folder, name, A_new, K_distortion_new, mean_error_pre, mean_error_post)
+    K = np.array(A_final, np.float32).reshape(3,3)
+    D = np.array([kc_final[0], kc_final[1], 0, 0] , np.float32)
+    print('Camera Intrinsic Matrix K:\n', K)
+    print('\nCamera Distortion Matrix D:\n', D)
+
+
 
 """
 Run the script: python3 intrinsic.py

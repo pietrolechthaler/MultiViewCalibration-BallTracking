@@ -9,7 +9,7 @@ import numpy as np
 import os
 import copy
 import utils.parameters as parameters
-
+import sys
 def loadImages(folder):
     """
     Load images from a given folder path into a list of numpy arrays
@@ -61,7 +61,7 @@ def getImagesCorners(images, chessBoardSize, output_folder):
         # Corners detected
         if ret == True:
             # Reshape the corners into 2D and add them to the list
-            img_corners = corners.reshape(-1, 2)
+            img_corners = corners.reshape(-1, 2)            
             output_corners.append(img_corners)
 
             # Draw the corners on the image for visualization
@@ -127,7 +127,7 @@ def getWorldCorners(chessboard_size, checker_size):
             # Calculate the coordinates for each corner:
             # multiply by checker_size to scale the coordinates by the size of the squares
             world_corners.append((i*checker_size, j*checker_size))
-    
+
     return np.array(world_corners)
 
 
