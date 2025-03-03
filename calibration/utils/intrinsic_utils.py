@@ -509,35 +509,34 @@ def loss_func(x0, RT_all, images_corners, world_corners):
     
     return np.array(error_all_images)
 
-def saveCalibrationResults(output_folder, camera_name, intrinsic_params, distortion_params, mean_error_pre, mean_error_post):
+def saveCalibrationResults(output_folder, camera_name, A, D, error_pre, error_post):
     """
-    Saves the calibration parameters in a JSON file.
+    Save the calibration results to a JSON file.
+    
+    Parameters:
+        output_folder (str): Path to the directory where the results file will be saved.
+        name (str): Base name for the results file.
+        A (numpy array): Camera intrinsic matrix.
+        D (numpy array): Distortion coefficients.
+        error_pre (float): Mean error before optimization.
+        error_post (float): Mean error after optimization.
     """
+    
     file_path = os.path.join(output_folder, f"{camera_name}_intrinsic.json")
     timestamp = datetime.datetime.now()
 
     calibration_data = {
-        "Camera_ID": camera_name,
-        "intrinsic": {
-            "alpha": intrinsic_params[0][0],
-            "beta": intrinsic_params[1, 1],
-            "gamma": intrinsic_params[0, 1],
-            "u0": intrinsic_params[0, 2],
-            "v0": intrinsic_params[1, 2],
-        },
-        "distortion": {
-            "k1": distortion_params[0],
-            "k2": distortion_params[1]
-        },
-        "meanError_preOpt": mean_error_pre,
-        "meanError_postOpt": mean_error_post,
-        "timestamp": timestamp.strftime('%Y-%m-%d %H:%M:%S')
+        "A": A.tolist(),
+        "D": D.tolist(),
+        "error_pre": error_pre,
+        "error_post": error_post,
+        "timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S")
     }
 
-    with open(file_path, 'w') as f:
-        json.dump(calibration_data, f, indent=4)
-
-    print(f"- Calibration parameters saved in {file_path}")
+    with open(file_path, 'w') as file:
+        json.dump(calibration_data, file, indent=4)
+    
+    print(f"- Calibration parameters saved to {file_path}")
 
 def read_chessboard_dimensions(folder_path):
     """

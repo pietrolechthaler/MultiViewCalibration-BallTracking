@@ -111,16 +111,18 @@ def zhang_calibaration(input_folder, checker_size):
     A_final = x1[0]
     kc_final = x1[1]
 
-    # FIXME: Save the calibration results
+    # Extracted from scipy.optimize result
+    print('Camera Intrinsic Matrix K:\n', A_new)
+    print('\nCamera Distortion Matrix D:\n', K_distortion_new)
+    
+    # Corrected output to display the camera intrinsic matrix and distortion coefficients
+    print('   Focal Length: [ {:.5f}  {:.5f} ]'.format(A_new[0,0], A_new[1,1]))
+    print('Principal Point: [ {:.5f}  {:.5f} ]'.format(A_new[0,2], A_new[1,2]))
+    print('           Skew: [ {:.7f} ]'.format(A_new[0,1]))
+    print('     Distortion: [ {:.6f}  {:.6f} ]'.format(K_distortion_new[0], K_distortion_new[1]))
+
     # Save the calibration results
-    # print("> Saving calibration results")
-    # utils.saveCalibrationResults(output_folder, name, A_new, K_distortion_new, mean_error_pre, mean_error_post)
-    K = np.array(A_final, np.float32).reshape(3,3)
-    D = np.array([kc_final[0], kc_final[1], 0, 0] , np.float32)
-    print('Camera Intrinsic Matrix K:\n', K)
-    print('\nCamera Distortion Matrix D:\n', D)
-
-
+    utils.saveCalibrationResults(output_folder, name, A_new, K_distortion_new, mean_error_pre, mean_error_post)
 
 """
 Run the script: python3 intrinsic.py
