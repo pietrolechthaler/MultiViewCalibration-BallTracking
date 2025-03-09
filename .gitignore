@@ -2,6 +2,10 @@
 video/
 papers/
 .DS_Store
+src-gen/
+.env/
+__pycache__/
+env/
 old code/
 tracking/yolo11n.pt
 tracking/detection/

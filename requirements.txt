@@ -1,5 +1,6 @@
-python==3.10.14 
 numpy==2.2.1
 opencv-python==4.10.0.84
 ultralytics==8.3.59
 #labelimg==1.8.6
+scipy==1.15.1
+tqdm==4.67.1
