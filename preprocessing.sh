@@ -3,7 +3,7 @@
 # Define the output folder
 ARTIFACTS="./src-gen"
 
-Check if the output folder exists and remove it
+# Check if the output folder exists and remove it
 if [ -d "$ARTIFACTS" ]; then
     echo "----------------------------------------"
     echo "> Removing existing artifacts folder"
