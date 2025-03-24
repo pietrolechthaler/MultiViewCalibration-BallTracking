@@ -1,21 +1,29 @@
 #!/bin/bash
 
-# Define the path to the 'src-gen' directory
-target_directory="src-gen/landsmark"
+# Configuration
+input_dir="video/match"
+output_dir="src-gen/landsmark"
+calib_root="src-gen"
 
-# Create 'landsmark' directory inside 'src-gen' if it doesn't exist
-mkdir -p "$target_directory"
+# Create output directory
+mkdir -p "$output_dir"
 
-# Navigate to the video directory
-cd "video/match" || exit
+# extract the first frame from the video using calibration/extract_first_frame.py
+python calibration/utils/extract_first_frame.py "$input_dir" "$output_dir"
 
-# Loop through all mp4 files and extract the first frame
-for video in *.mp4; do
-    # Define the output filename (change extension to .jpg)
-    output_file="${video%.mp4}.jpg"
+# Process images 1-3
+for i in {1,3}; do
+    calib_folder="${calib_root}/out${i}F-gen"
+    input_img="${output_dir}/out${i}.jpg" 
+    output_img="${output_dir}/out${i}-undist.jpg"
+
     
-    # Use FFmpeg to extract the first frame and save it to the 'landsmark' directory
-    ffmpeg -i "$video" -frames:v 1 "../../$target_directory/$output_file"
+    if [ -d "$calib_folder" ] && [ -f "$input_img" ]; then
+        echo "Processing out${i} with calibration from $calib_folder"
+        python calibration/undistortion.py "$calib_folder" "$input_img" "$output_img"
+    else
+        echo "Skipping out${i} - missing calibration or input image"
+    fi
 done
 
-echo "Extraction complete."
+echo "Undistortion process completed"

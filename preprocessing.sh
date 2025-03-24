@@ -13,4 +13,4 @@ fi
 # Run the Python script to extract frames from videos
 echo "----------------------------------------"
 echo "> Extracting frames from videos"
-python3 calibration/utils/preprocessing.py
+python calibration/utils/preprocessing.py

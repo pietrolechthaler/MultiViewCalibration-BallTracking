@@ -6,3 +6,5 @@ src-gen/
 .env/
 __pycache__/
 env/
+tracking/
+old code/
