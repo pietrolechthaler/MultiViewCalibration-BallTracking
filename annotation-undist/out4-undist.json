@@ -1,0 +1,60 @@
+{
+    "5": {
+        "coordinates": {
+            "x": 1236,
+            "y": 875
+        },
+        "status": "ok"
+    },
+    "8": {
+        "coordinates": {
+            "x": 416,
+            "y": 1351
+        },
+        "status": "ok"
+    },
+    "9": {
+        "status": "occluded/missing"
+    },
+    "10": {
+        "status": "occluded/missing"
+    },
+    "3": {
+        "coordinates": {
+            "x": 526,
+            "y": 848
+        },
+        "status": "ok"
+    },
+    "1": {
+        "status": "occluded/missing"
+    },
+    "6": {
+        "coordinates": {
+            "x": 2054,
+            "y": 902
+        },
+        "status": "ok"
+    },
+    "4": {
+        "coordinates": {
+            "x": 874,
+            "y": 860
+        },
+        "status": "ok"
+    },
+    "2": {
+        "coordinates": {
+            "x": 90,
+            "y": 921
+        },
+        "status": "ok"
+    },
+    "7": {
+        "coordinates": {
+            "x": 1558,
+            "y": 1454
+        },
+        "status": "ok"
+    }
+}
