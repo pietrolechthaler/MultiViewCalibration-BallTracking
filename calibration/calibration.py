@@ -9,9 +9,9 @@ import utils.calibration_utils as utils
 
 def calibrate_camera(folder):
     """
-    Calibrate the camera using chessboard images.
+    Calibrate the camera using chessboard images
     Parameters:
-        folder (str): Directory containing input images for calibration
+        folder (str): Folder containing input images for calibration
     
     Returns:
         ret: The RMS re-projection error
@@ -42,21 +42,20 @@ def calibrate_camera(folder):
     images = glob.glob(os.path.join(folder, '*.jpg'))
     
     if not images:
-        #print(f"No calibration images found at {}")
+        print(f"No calibration images found at {folder}")
         return None, None, None, None, None
     
+    print(f"> Found {len(images)} calibration images")
 
     # Create output folder if it doesn't exist
-    name = os.path.basename(folder)
-    out_name = name + parameters.OUT
-    output_folder = os.path.join(os.path.dirname(folder), out_name)    
+    folder_name = os.path.basename(folder)
+    out_name = folder_name + parameters.OUT
+    out_path = os.path.join(os.path.dirname(folder), out_name)    
 
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-        print(f"> Created output folder: {output_folder}")
+    if not os.path.exists(out_path):
+        print(f"> Created output folder: {out_path}")
+        os.makedirs(out_path)
         
-    print(f"> Found {len(images)} calibration images")
-    
     # Process each calibration image
     for idx, fname in enumerate(images):
         img = cv2.imread(fname)
@@ -78,7 +77,7 @@ def calibrate_camera(folder):
             cv2.drawChessboardCorners(img, chessboard_size, corners2, ret)
             
             # Save image with corners drawn
-            output_img_path = os.path.join(output_folder, f'corners_{os.path.basename(fname)}')
+            output_img_path = os.path.join(out_path, f'corners_{os.path.basename(fname)}')
             cv2.imwrite(output_img_path, img)
             
             print(f"- Processed image {idx+1}/{len(images)}: {fname} - Chessboard found")
@@ -105,92 +104,18 @@ def calibrate_camera(folder):
         'reprojection_error': ret
     }
     
-    with open(os.path.join(output_folder, 'calibration_data.pkl'), 'wb') as f:
+    with open(os.path.join(out_path, 'calibration_data.pkl'), 'wb') as f:
         pickle.dump(calibration_data, f)
     
     # Save camera matrix and distortion coefficients as text files
-    np.savetxt(os.path.join(output_folder, 'camera_matrix.txt'), mtx)
-    np.savetxt(os.path.join(output_folder, 'distortion_coefficients.txt'), dist)
+    np.savetxt(os.path.join(out_path, 'camera_matrix.txt'), mtx)
+    np.savetxt(os.path.join(out_path, 'distortion_coefficients.txt'), dist)
     
     print(f"> Calibration complete! RMS re-projection error: {ret}")
-    print(f"> Results saved to {output_folder}")
+    print(f"> Results saved to {out_path}")
     
     return ret, mtx, dist, rvecs, tvecs
 
-def undistort_images(mtx, dist, folder):
-    """
-    Undistort all calibration images using the calibration results.
-    
-    Args:
-        mtx: Camera matrix
-        dist: Distortion coefficients
-        folder: Directory containing calibration images
-    """
-    
-    images = glob.glob(os.path.join(folder, '*.jpg'))
-    
-    if not images:
-        print(f"No images found at {folder}")
-        return
-    
-    # Create output folder if it doesn't exist
-    name = os.path.basename(folder)
-    out_name = name + parameters.DISTORTION
-    undistorted_dir = os.path.join(os.path.dirname(folder), out_name)    
-
-    if not os.path.exists(undistorted_dir):
-        os.makedirs(undistorted_dir)
-    
-    print(f"> Undistorting {len(images)} images...")
-    
-    for idx, fname in enumerate(images):
-        img = cv2.imread(fname)
-        h, w = img.shape[:2]
-        
-        # Refine camera matrix based on free scaling parameter
-        newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
-        
-        # Undistort image
-        dst = cv2.undistort(img, mtx, dist, None, newcameramtx)
-        
-        # Crop the image (optional)
-        x, y, w, h = roi
-        dst = dst[y:y+h, x:x+w]
-        
-        # Save undistorted image
-        output_img_path = os.path.join(undistorted_dir, f'undistorted_{os.path.basename(fname)}')
-        cv2.imwrite(output_img_path, dst)
-        
-        print(f"- Undistorted image {idx+1}/{len(images)}: {fname}")
-    
-    print(f"- Undistorted images saved to {undistorted_dir}")
-
-def calculate_reprojection_error(objpoints, imgpoints, mtx, dist, rvecs, tvecs):
-    """
-    Calculate the reprojection error for each calibration image.
-    
-    Args:
-        objpoints: 3D points in real world space
-        imgpoints: 2D points in image plane
-        mtx: Camera matrix
-        dist: Distortion coefficients
-        rvecs: Rotation vectors
-        tvecs: Translation vectors
-    
-    Returns:
-        mean_error: Mean reprojection error
-    """
-    total_error = 0
-    for i in range(len(objpoints)):
-        imgpoints2, _ = cv2.projectPoints(objpoints[i], rvecs[i], tvecs[i], mtx, dist)
-        error = cv2.norm(imgpoints[i], imgpoints2, cv2.NORM_L2) / len(imgpoints2)
-        total_error += error
-        print(f"Reprojection error for image {i+1}: {error}")
-    
-    mean_error = total_error / len(objpoints)
-    print(f"Mean reprojection error: {mean_error}")
-    
-    return mean_error
 
 def main():
     """
@@ -206,22 +131,24 @@ def main():
         print(f"> Error: The folder {SRC_GEN} does not exist.")
         return
 
-    # Process each subdirectory in the src-gen folder
-    for folder_name in os.listdir(SRC_GEN):
+    # Process each subfolder in the src-gen folder
+    for subfolder_name in os.listdir(SRC_GEN):
 
-        folder_path = os.path.join(SRC_GEN, folder_name)
+        subfolder_path = os.path.join(SRC_GEN, subfolder_name)
         
-        if os.path.isdir(folder_path):
+        if os.path.isdir(subfolder_path):
+            # Calibrate the camera
+            ret, mtx, dist, rvecs, tvecs = calibrate_camera(subfolder_path)
             
-            ret, mtx, dist, rvecs, tvecs = calibrate_camera(folder_path)
-            
+            # Check if calibration was successful
             if mtx is None:
                 print("> Calibration failed for folder: {folder_path}")
                 continue
             else:
-                print("> Saving undistorted images...")
+                # Save undistorted images if required
                 if(parameters.SAVE_UNDISTORTED):
-                    undistort_images(mtx, dist, folder_path)
+                    print("> Saving undistorted images...")
+                    utils.undistort_images(mtx, dist, subfolder_path)
     
 if __name__ == "__main__":
     main()
