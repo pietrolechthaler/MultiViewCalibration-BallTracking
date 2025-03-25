@@ -21,7 +21,9 @@ SKIP_FRAMES = 25
 SQUARE_SIZE = 28 #mm
 
 OUT = "-gen"
+DISTORTION = "-distortion"
 JSON_CHESSBOARD = "chessboard.json"
 SRC_GEN = './src-gen'
 SETUP = "./setup.json"
 LANDMARKS = "landmarks.json"
+SAVE_UNDISTORTED = True

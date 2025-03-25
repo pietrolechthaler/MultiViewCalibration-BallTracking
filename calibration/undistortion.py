@@ -1,74 +1,81 @@
-# correct_video.py
 import cv2
 import numpy as np
-import json
+import os
 import sys
+import pickle
 
-def correct_video(calibration_json, input_video, output_video):
+def load_calibration_files(calib_folder):
     """
-    Correct the distortion of a video using calibration parameters.
+    Load calibration data from folder containing:
+    - calibration_data.pkl
+    - camera_matrix.txt
+    - distortion_coefficients.txt
     
-    :param calibration_json: Path to the calibration JSON file.
-    :param input_video: Path to the input video.
-    :param output_video: Path to the output video.
+    Returns:
+        mtx: Camera matrix
+        dist: Distortion coefficients
     """
-    # Load calibration parameters from the JSON file
-    with open(calibration_json, 'r') as f:
-        calibration_data = json.load(f)
+    try:
+        # Load from text files (primary source)
+        mtx = np.loadtxt(os.path.join(calib_folder, 'camera_matrix.txt'))
+        dist = np.loadtxt(os.path.join(calib_folder, 'distortion_coefficients.txt'))
+        
+        # Verify pkl exists for consistency check
+        pkl_path = os.path.join(calib_folder, 'calibration_data.pkl')
+        if not os.path.exists(pkl_path):
+            print(f"Warning: {pkl_path} not found, using text files only")
+            
+        return mtx, dist
+        
+    except Exception as e:
+        print(f"Error loading calibration: {str(e)}")
+        return None, None
 
-    # Extract the camera matrix (A) and distortion coefficients (D)
-    A = np.array(calibration_data['A'])
-    D = np.array(calibration_data['D'])
-
-    # Open the input video
-    cap = cv2.VideoCapture(input_video)
-    if not cap.isOpened():
-        print(f"Error: Unable to open video {input_video}. Check the file path.")
-        return
-
-    # Get video dimensions
-    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fps = int(cap.get(cv2.CAP_PROP_FPS))
-
-    # Create a new camera matrix for distortion correction
-    new_camera_matrix, roi = cv2.getOptimalNewCameraMatrix(A, D, (w, h), 1, (w, h))
-
-    # Create a VideoWriter object to save the corrected video
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for MP4 format
-    out = cv2.VideoWriter(output_video, fourcc, fps, (w, h))
-
-    # Read and correct each frame of the video
-    frame_count = 0
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break  # Exit the loop if there are no more frames
-
-        # Apply distortion correction
-        undistorted_frame = cv2.undistort(frame, A, D, None, new_camera_matrix)
-
-        # Write the corrected frame to the output video
-        out.write(undistorted_frame)
-
-        # Print progress
-        frame_count += 1
-        print(f"Processed frames: {frame_count} of {total_frames}")
-
-    # Release resources
-    cap.release()
-    out.release()
-
-    print(f"Corrected video saved successfully at: {output_video}")
+def undistort_single_image(mtx, dist, img_path, output_path):
+    """
+    Apply undistortion to single image using OpenCV's optimal parameters
+    """
+    try:
+        img = cv2.imread(img_path)
+        if img is None:
+            raise ValueError(f"Could not read image: {img_path}")
+        
+        h, w = img.shape[:2]
+        
+        # Get optimal new camera matrix (matches calibration approach)
+        new_mtx, roi = cv2.getOptimalNewCameraMatrix(
+            mtx, dist, (w, h), 1, (w, h)
+        )
+        
+        # Apply undistortion (same method as in reference)
+        undistorted = cv2.undistort(
+            img, mtx, dist, None, new_mtx
+        )
+        
+        # Crop to ROI (matches reference implementation)
+        x, y, w, h = roi
+        undistorted = undistorted[y:y+h, x:x+w]
+        
+        cv2.imwrite(output_path, undistorted)
+        print(f"Undistorted image saved to {output_path}")
+        return True
+        
+    except Exception as e:
+        print(f"Undistortion failed: {str(e)}")
+        return False
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: python correct_video.py <calibration_json> <input_video> <output_video>")
+
+    
+    calib_folder = sys.argv[1]
+    input_img = sys.argv[2]
+    output_img = sys.argv[3]
+    
+    # Load calibration
+    mtx, dist = load_calibration_files(calib_folder)
+    if mtx is None or dist is None:
         sys.exit(1)
-
-    calibration_json = sys.argv[1]
-    input_video = sys.argv[2]
-    output_video = sys.argv[3]
-
-    correct_video(calibration_json, input_video, output_video)
+    
+    # Process image
+    success = undistort_single_image(mtx, dist, input_img, output_img)
+    sys.exit(0 if success else 1)

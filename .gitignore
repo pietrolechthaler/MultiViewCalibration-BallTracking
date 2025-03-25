@@ -3,18 +3,7 @@ video/
 papers/
 .DS_Store
 src-gen/
-.env/
 __pycache__/
 env/
+tracking/
 old code/
-tracking/yolo11n.pt
-tracking/detection/
-tracking/tndataset/labelImg/
-tracking/tndataset/labels/
-tracking/runs/detect/train2/
-tracking/runs/detect/train/
-tracking/tndataset/frames/
-tracking/tndataset/frames2/
-tracking/tndataset/labelimg_env2/
-tracking/tndataset/labels2/
-tracking/datasets/

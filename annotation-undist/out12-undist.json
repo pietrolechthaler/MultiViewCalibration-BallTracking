@@ -1,71 +1,71 @@
 {
     "5": {
         "coordinates": {
-            "x": 2602,
-            "y": 1490
+            "x": 816,
+            "y": 462
         },
         "status": "ok"
     },
     "8": {
         "coordinates": {
-            "x": 990,
-            "y": 1479
+            "x": 458,
+            "y": 472
         },
         "status": "ok"
     },
     "9": {
         "coordinates": {
-            "x": 1083,
-            "y": 1342
+            "x": 420,
+            "y": 423
         },
         "status": "ok"
     },
     "10": {
         "coordinates": {
-            "x": 1155,
-            "y": 1238
+            "x": 389,
+            "y": 383
         },
         "status": "ok"
     },
     "3": {
         "coordinates": {
-            "x": 2444,
-            "y": 1249
+            "x": 797,
+            "y": 390
         },
         "status": "ok"
     },
     "1": {
         "coordinates": {
-            "x": 1267,
-            "y": 1076
+            "x": 341,
+            "y": 320
         },
         "status": "ok"
     },
     "6": {
         "coordinates": {
-            "x": 2858,
-            "y": 1900
+            "x": 970,
+            "y": 565
         },
         "status": "ok"
     },
     "4": {
         "coordinates": {
-            "x": 2516,
-            "y": 1357
+            "x": 758,
+            "y": 423
         },
         "status": "ok"
     },
     "2": {
         "coordinates": {
-            "x": 2340,
-            "y": 1087
+            "x": 627,
+            "y": 336
         },
         "status": "ok"
     },
     "7": {
         "coordinates": {
-            "x": 723,
-            "y": 1882
+            "x": 566,
+            "y": 613
         },
         "status": "ok"
     }
