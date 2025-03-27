@@ -11,21 +11,22 @@ from mpl_toolkits.mplot3d import Axes3D
 # Carica i punti 2D dalle telecamere
 with open('annotation-undist/out1-undist.json') as f:
     points_cam1 = json.load(f)
-with open('annotation-undist/out4-undist.json') as f:
+with open('annotation-undist/out2-undist.json') as f:
     points_cam2 = json.load(f)
 
 # Coordinate 3D REALI dei punti del campo (in metri)
 points3D_campo = np.array([
-    [9, 0, 0],         # C1
+    [0, 9, 0],      # C1
     [0, 0, 0],      # C2
     [4.5, 0, 0],    # C3
-    [0, 9, 0],      # C4
-    [13.5, 0, 0],   # C5
+    [9, 0, 0],      # C4
+    [13.5, 0, 0],   # C5    
     [18, 0, 0],     # C6
-    [18, 9, 0],     # C7
+    [18, 9, 0],      # C7
     [13.5, 9, 0],   # C8
     [9, 9, 0],      # C9 
-    [4.5, 9, 0]     # C10
+    [4.5, 9, 0]    # C10
+
 ], dtype=np.float32)
 
 # Funzione per estrarre punti validi dai JSON
@@ -54,8 +55,8 @@ points2D_cam2, points3D_cam2 = prepare_points(points_cam2, points3D_campo)
 # Carica le matrici intrinseche 
 camera_matrix1 = np.loadtxt('src-gen/out1F-gen/camera_matrix.txt')
 dist_coeffs1 = np.loadtxt('src-gen/out1F-gen/distortion_coefficients.txt')
-camera_matrix2 = np.loadtxt('src-gen/out4F-gen/camera_matrix.txt')
-dist_coeffs2 = np.loadtxt('src-gen/out4F-gen/distortion_coefficients.txt')
+camera_matrix2 = np.loadtxt('src-gen/out2F-gen/camera_matrix.txt')
+dist_coeffs2 = np.loadtxt('src-gen/out2F-gen/distortion_coefficients.txt')
 
 # Calibrazione per Camera 1
 ret1, rvec1, tvec1 = cv2.solvePnP(
@@ -102,30 +103,61 @@ proj_matrix2 = camera_matrix2 @ np.hstack((R2, tvec2))
 
 # print(f"Posizione 3D del giocatore: X={point3D[0]:.2f}m, Y={point3D[1]:.2f}m, Z={point3D[2]:.2f}m")
 
+
 # ---------------------------
-# 5. VISUALIZZAZIONE
+# 6. STAMPA DEI PARAMETRI DELLE TELECAMERE
 # ---------------------------
-fig = plt.figure(figsize=(10, 7))
+
+def print_camera_params(cam_id, camera_matrix, tvec, points3D):
+    """Stampa i parametri della telecamera in formato leggibile"""
+    print(f"\nCamera {cam_id}:")
+    print("Matrice di camera:")
+    print(np.array2string(camera_matrix, suppress_small=True, precision=6))
+    
+    # Calcola distanza media ai punti
+    distances = [np.linalg.norm(tvec.flatten() - pt) for pt in points3D]
+    avg_distance = np.mean(distances)
+    
+    print("Vettore di traslazione (tvec):")
+    print(np.array2string(tvec.flatten(), suppress_small=True, precision=6))
+    print(f"Distanza media ai punti: {avg_distance:.2f} unità")
+
+# Stampa i parametri per Camera 1
+print_camera_params(1, camera_matrix1, tvec1, points3D_cam1)
+
+# Stampa i parametri per Camera 2 (4 nel tuo caso)
+print_camera_params(2, camera_matrix2, tvec2, points3D_cam2)
+
+# ---------------------------
+# 7. VISUALIZZAZIONE MIGLIORATA
+# ---------------------------
+fig = plt.figure(figsize=(12, 8))
 ax = fig.add_subplot(111, projection='3d')
 
-# Disegna il campo
-ax.scatter(points3D_campo[:, 0], points3D_campo[:, 1], points3D_campo[:, 2], 
-           c='blue', marker='o', s=50, label='Punti campo')
+# Disegna il campo con etichette
+for i, pt in enumerate(points3D_campo):
+    ax.scatter(pt[0], pt[1], pt[2], c='blue', marker='o', s=50)
+    ax.text(pt[0], pt[1], pt[2], f'C{i+1}', color='blue')
 
-# # Disegna il giocatore triangolato
-# ax.scatter(point3D[0], point3D[1], point3D[2], 
-#            c='red', marker='*', s=100, label='Giocatore')
+# Disegna le telecamere con assi di orientamento
+def draw_camera(ax, tvec, R, color, label):
+    tvec = tvec.flatten()
+    ax.scatter(tvec[0], tvec[1], tvec[2], c=color, s=100, label=label)
+    
+    # Disegna i 3 assi della telecamera
+    axis_length = 0.5
+    for col, axis in zip(['r','g','b'], [R[:,0], R[:,1], R[:,2]]):
+        ax.quiver(tvec[0], tvec[1], tvec[2],
+                 axis[0], axis[1], axis[2],
+                 length=axis_length, color=col, linewidth=2)
 
-# Disegna le telecamere
-ax.quiver(tvec1[0], tvec1[1], tvec1[2], R1[0,0], R1[1,0], R1[2,0], 
-          length=1, color='green', label='Camera 1')
-ax.quiver(tvec2[0], tvec2[1], tvec2[2], R2[0,0], R2[1,0], R2[2,0], 
-          length=1, color='magenta', label='Camera 2')
+draw_camera(ax, tvec1, R1, 'green', 'Camera 1')
+draw_camera(ax, tvec2, R2, 'magenta', 'Camera 2')
 
 ax.set_xlabel('X (m)')
 ax.set_ylabel('Y (m)')
 ax.set_zlabel('Z (m)')
-ax.set_title('Ricostruzione 3D del campo di pallavolo')
-ax.legend()
+ax.set_title('Ricostruzione 3D del campo di pallavolo\n(Visualizzazione assi telecamere)')
+ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
 plt.show()
