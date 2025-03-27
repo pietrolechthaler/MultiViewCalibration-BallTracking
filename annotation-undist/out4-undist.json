@@ -44,11 +44,7 @@
         "status": "ok"
     },
     "2": {
-        "coordinates": {
-            "x": 90,
-            "y": 921
-        },
-        "status": "ok"
+        "status": "occluded/missing"
     },
     "7": {
         "coordinates": {
