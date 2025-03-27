@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Vision Project</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Computer Vision Project</h1>
+    <p>Click on an image to see the corresponding point in the other images</p> 
+    <div class="image-container" id="imageContainer"></div>
+    <div class="marker" id="marker" style="display: none;"></div> <!-- Marker hide -->
+
+    <script>
+        const imageContainer = document.getElementById('imageContainer');
+        const marker = document.getElementById('marker');
+
+        // Request to obtain images
+        fetch('/images')
+            .then(response => response.json())
+            .then(images => {
+                // For each image create a container with the image and its label
+                images.forEach(image => {
+                    const imgContainer = document.createElement('div');
+                    const img = document.createElement('img');
+                    img.src = image.src;
+                    img.dataset.index = image.label;
+                    img.id = image.label;
+
+                    const label = document.createElement('p');
+                    label.textContent = image.label;
+
+                    // Add elements
+                    imgContainer.appendChild(img);
+                    imgContainer.appendChild(label);
+                    imageContainer.appendChild(imgContainer);
+
+                    // Add event listener to the image
+                    img.addEventListener('click', (event) => {
+                        const rect = img.getBoundingClientRect();
+
+                        const x = event.clientX - rect.left;
+                        const y = event.clientY - rect.top;
+
+                        // Create marker
+                        marker.style.left = `${x + rect.left - 5}px`;
+                        marker.style.top = `${y + rect.top - 5}px`;
+                        marker.style.display = 'block';
+
+                        // Send coordinates to the server
+                        fetch('/click', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ x: x, y: y, label: label.textContent })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data.status);
+                            displayCorrespondingPoints(data.points);
+                        });
+                    });
+                });
+            });
+
+            function displayCorrespondingPoints(points) {
+                // Remove all previous point markers
+                document.querySelectorAll('.point-marker').forEach(marker => marker.remove());
+                
+                // For each point create a marker
+                Object.entries(points).forEach(([label, coords]) => {
+                    
+                    // Get the image with the corresponding label
+                    const img = document.querySelector(`img[data-index="${label}"]`);
+                    if (img) {
+                        const rect = img.getBoundingClientRect();
+                        
+                        // Create marker
+                        const pointMarker = document.createElement('div');
+                        pointMarker.className = 'point-marker';
+                        pointMarker.style.position = 'absolute';
+                        pointMarker.style.left = `${coords.x + rect.left - 5}px`;
+                        pointMarker.style.top = `${coords.y + rect.top - 5}px`;
+                        pointMarker.style.width = '10px';
+                        pointMarker.style.height = '10px';
+                        pointMarker.style.backgroundColor = 'red';
+                        pointMarker.style.borderRadius = '50%';
+                        pointMarker.style.zIndex = '100';
+                        
+                        // Add marker to the body
+                        document.body.appendChild(pointMarker);
+                    }
+                });
+            }
+    </script>
+</body>
+</html>
