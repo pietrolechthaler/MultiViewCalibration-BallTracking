@@ -1,0 +1,100 @@
+{
+    "1": {
+        "coordinates": {
+            "x": 752,
+            "y": 1356
+        },
+        "status": "ok"
+    },
+    "2": {
+        "coordinates": {
+            "x": 1104,
+            "y": 1043
+        },
+        "status": "ok"
+    },
+    "3": {
+        "coordinates": {
+            "x": 1590,
+            "y": 1049
+        },
+        "status": "ok"
+    },
+    "4": {
+        "coordinates": {
+            "x": 1852,
+            "y": 1052
+        },
+        "status": "ok"
+    },
+    "5": {
+        "coordinates": {
+            "x": 2115,
+            "y": 1059
+        },
+        "status": "ok"
+    },
+    "6": {
+        "coordinates": {
+            "x": 2608,
+            "y": 1072
+        },
+        "status": "ok"
+    },
+    "7": {
+        "coordinates": {
+            "x": 2950,
+            "y": 1388
+        },
+        "status": "ok"
+    },
+    "8": {
+        "coordinates": {
+            "x": 2252,
+            "y": 1398
+        },
+        "status": "ok"
+    },
+    "9": {
+        "coordinates": {
+            "x": 1843,
+            "y": 1401
+        },
+        "status": "ok"
+    },
+    "10": {
+        "coordinates": {
+            "x": 1440,
+            "y": 1385
+        },
+        "status": "ok"
+    },
+    "11": {
+        "coordinates": {
+            "x": 851,
+            "y": 1264
+        },
+        "status": "ok"
+    },
+    "12": {
+        "coordinates": {
+            "x": 1043,
+            "y": 1100
+        },
+        "status": "ok"
+    },
+    "13": {
+        "coordinates": {
+            "x": 2668,
+            "y": 1123
+        },
+        "status": "ok"
+    },
+    "14": {
+        "coordinates": {
+            "x": 2851,
+            "y": 1292
+        },
+        "status": "ok"
+    }
+}
