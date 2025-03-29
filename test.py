@@ -51,7 +51,7 @@ def loadWorldAndImagePoints(cam_id):
 
 
 def main():
-    CAMERA_IDS = [1, 2, 3, 4, 6, 7, 8, 12, 13]
+    CAMERA_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 12, 13]
     camera_positions = []
     
     # Definisci i colori per le telecamere
@@ -72,17 +72,15 @@ def main():
                 dist_coeffs
             )
 
-
-
             # Converti il vettore di rotazione in matrice
             rotation_matrix, _ = cv2.Rodrigues(rotation_vector)
 
             camera_position = -np.dot(rotation_matrix.T, translation_vector)
 
             # Inverti Z per avere positivo=alto (se preferisci)
-            # camera_position[2] *= -1
-            # rotation_matrix[:,2] *= -1
-            # translation_vector[2] *= -1
+            camera_position[2] *= -1
+            rotation_matrix[:,2] *= -1
+            translation_vector[2] *= -1
             camera_positions.append((cam_id, camera_position, rotation_matrix, translation_vector))
 
 
