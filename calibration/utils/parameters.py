@@ -17,7 +17,7 @@ VIDEO_PATHS = [
 #     ['./video/board/out12F.mp4', (7,5)],
 # ]
 
-SKIP_FRAMES = 25
+SKIP_FRAMES = 10
 SQUARE_SIZE = 28 #mm
 
 OUT = "-gen"

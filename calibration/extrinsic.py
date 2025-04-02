@@ -53,6 +53,15 @@ def main():
         camera_matrix = np.loadtxt(f'./src-gen/out{cam_id}F-gen/camera_matrix.txt', dtype=np.float32)
         dist_coeffs = np.loadtxt(f'./src-gen/out{cam_id}F-gen/distortion_coefficients.txt', dtype=np.float32)
 
+        # Caricare il file .pkl
+        with open(f'./src-gen/out{cam_id}F-gen/calibration_data.pkl', 'rb') as file:
+            dati_pkl = pickle.load(file)
+
+        # Stampa il valore desiderato dal file .pkl
+        valore_da_stampare = dati_pkl['reprojection_error']
+        print(f"Valore estratto dal file pkl: {valore_da_stampare}")
+
+
         # Get the world and image points for the camera
         world_points, image_points = loadWorldAndImagePoints(cam_id)
 
@@ -71,16 +80,16 @@ def main():
         camera_position = -np.dot(rotation_matrix.T, translation_vector)
 
         # Invert Z to have positive = up
-        camera_position[2] *= -1
-        rotation_matrix[:, 2] *= -1
-        translation_vector[2] *= -1
-        camera_positions.append((cam_id, camera_position, rotation_matrix, translation_vector))
+        # camera_position[2] *= -1
+        # rotation_matrix[:, 2] *= -1
+        # translation_vector[2] *= -1
+        camera_positions.append((cam_id, camera_position, rotation_matrix.T, translation_vector))
 
         # Print the results
-        print(f"Posizione della camera {cam_id} nel mondo 3D (X, Y, Z in metri):\n")
-        print(f"{camera_position.flatten()}\n")
-        print(f"Matrice di rotazione per camera {cam_id}:\n{rotation_matrix}\n")
-        print(f"Vettore di traslazione per camera {cam_id}:\n{translation_vector.flatten()}\n\n")
+        #print(f"Posizione della camera {cam_id} nel mondo 3D (X, Y, Z in metri):\n")
+        #print(f"{camera_position.flatten()}\n")
+        #print(f"Matrice di rotazione per camera {cam_id}:\n{rotation_matrix}\n")
+        #print(f"Vettore di traslazione per camera {cam_id}:\n{translation_vector.flatten()}\n\n")
 
         # Save the extrinsic calibration data in a pickle file
         extrinsic_data = {
