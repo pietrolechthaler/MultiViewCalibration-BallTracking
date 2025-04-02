@@ -30,7 +30,6 @@ def loadWorldAndImagePoints(cam_id):
                 coords_3d = WORLD[key]
                 world_points.append(coords_3d)
 
-    # Converti le liste in array NumPy con dtype float32
     w_points = np.array(world_points, dtype=np.float32)
     i_points = np.array(image_points, dtype=np.float32)
 
@@ -71,10 +70,10 @@ def main():
         # Compute the camera position
         camera_position = -np.dot(rotation_matrix.T, translation_vector)
 
-        # Invert Z to have positive = up (if you prefer)
-        #camera_position[2] *= -1
-        #rotation_matrix[:, 2] *= -1
-        #translation_vector[2] *= -1
+        # Invert Z to have positive = up
+        camera_position[2] *= -1
+        rotation_matrix[:, 2] *= -1
+        translation_vector[2] *= -1
         camera_positions.append((cam_id, camera_position, rotation_matrix, translation_vector))
 
         # Print the results
@@ -126,20 +125,19 @@ def main():
     def draw_camera(ax, tvec, R, color, label):
         tvec = tvec.flatten()
         ax.scatter(tvec[0], tvec[1], tvec[2], c=color, s=100, label=label)
-        axis_length = 1.5  # Puoi modificare la lunghezza per meglio adattarla alla tua visualizzazione
+        axis_length = 1.5 
 
-        # Disegna gli assi della camera
+        # Camera axes
         for col, axis in zip(['r', 'g', 'b'], [R[:, 0], R[:, 1], R[:, 2]]):
-            end_point = tvec + axis_length * axis  # Calcola il punto finale dell'asse
+            end_point = tvec + axis_length * axis 
             ax.quiver(tvec[0], tvec[1], tvec[2], axis[0], axis[1], axis[2],
                     length=axis_length, color=col, linewidth=2)
 
-        ax.text(tvec[0], tvec[1], tvec[2], label, color=color)  # Etichetta per la posizione della camera
-
+        ax.text(tvec[0], tvec[1], tvec[2], label, color=color)  # Label camera
 
     # Draw all the cameras
     for idx, (cam_id, camera_position, rotation_matrix, translation_vector) in enumerate(camera_positions):
-        color = colors[idx % len(colors)]  # Associa un colore unico
+        color = colors[idx % len(colors)]
         draw_camera(ax, camera_position, rotation_matrix, color, f'Camera {cam_id}')
 
     ax.set_xlabel('X (m)')
