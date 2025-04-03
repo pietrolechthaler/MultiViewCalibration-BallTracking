@@ -1,21 +1,21 @@
 {
     "1": {
         "coordinates": {
-            "x": 752,
-            "y": 1356
+            "x": 748,
+            "y": 1350
         },
         "status": "ok"
     },
     "2": {
         "coordinates": {
-            "x": 1104,
-            "y": 1043
+            "x": 1100,
+            "y": 1046
         },
         "status": "ok"
     },
     "3": {
         "coordinates": {
-            "x": 1590,
+            "x": 1587,
             "y": 1049
         },
         "status": "ok"
@@ -23,48 +23,48 @@
     "4": {
         "coordinates": {
             "x": 1852,
-            "y": 1052
+            "y": 1049
         },
         "status": "ok"
     },
     "5": {
         "coordinates": {
             "x": 2115,
-            "y": 1059
+            "y": 1056
         },
         "status": "ok"
     },
     "6": {
         "coordinates": {
             "x": 2608,
-            "y": 1072
+            "y": 1065
         },
         "status": "ok"
     },
     "7": {
         "coordinates": {
-            "x": 2950,
-            "y": 1388
+            "x": 2947,
+            "y": 1385
         },
         "status": "ok"
     },
     "8": {
         "coordinates": {
-            "x": 2252,
+            "x": 2246,
             "y": 1398
         },
         "status": "ok"
     },
     "9": {
         "coordinates": {
-            "x": 1843,
-            "y": 1401
+            "x": 1836,
+            "y": 1395
         },
         "status": "ok"
     },
     "10": {
         "coordinates": {
-            "x": 1440,
+            "x": 1436,
             "y": 1385
         },
         "status": "ok"
@@ -72,28 +72,140 @@
     "11": {
         "coordinates": {
             "x": 851,
-            "y": 1264
+            "y": 1257
         },
         "status": "ok"
     },
     "12": {
         "coordinates": {
-            "x": 1043,
-            "y": 1100
+            "x": 1036,
+            "y": 1097
         },
         "status": "ok"
     },
     "13": {
         "coordinates": {
             "x": 2668,
-            "y": 1123
+            "y": 1120
         },
         "status": "ok"
     },
     "14": {
         "coordinates": {
             "x": 2851,
+            "y": 1286
+        },
+        "status": "ok"
+    },
+    "15": {
+        "coordinates": {
+            "x": 156,
+            "y": 1462
+        },
+        "status": "ok"
+    },
+    "16": {
+        "coordinates": {
+            "x": 864,
+            "y": 985
+        },
+        "status": "ok"
+    },
+    "17": {
+        "coordinates": {
+            "x": 2848,
+            "y": 1011
+        },
+        "status": "ok"
+    },
+    "18": {
+        "coordinates": {
+            "x": 3558,
+            "y": 1507
+        },
+        "status": "ok"
+    },
+    "19": {
+        "coordinates": {
+            "x": 464,
+            "y": 1241
+        },
+        "status": "ok"
+    },
+    "20": {
+        "coordinates": {
+            "x": 684,
+            "y": 1094
+        },
+        "status": "ok"
+    },
+    "21": {
+        "coordinates": {
+            "x": 2668,
+            "y": 1123
+        },
+        "status": "ok"
+    },
+    "22": {
+        "coordinates": {
+            "x": 2848,
             "y": 1292
+        },
+        "status": "ok"
+    },
+    "23": {
+        "coordinates": {
+            "x": 921,
+            "y": 1264
+        },
+        "status": "ok"
+    },
+    "24": {
+        "coordinates": {
+            "x": 953,
+            "y": 1238
+        },
+        "status": "ok"
+    },
+    "25": {
+        "coordinates": {
+            "x": 1081,
+            "y": 1116
+        },
+        "status": "ok"
+    },
+    "26": {
+        "coordinates": {
+            "x": 1097,
+            "y": 1100
+        },
+        "status": "ok"
+    },
+    "27": {
+        "coordinates": {
+            "x": 2608,
+            "y": 1123
+        },
+        "status": "ok"
+    },
+    "28": {
+        "coordinates": {
+            "x": 2624,
+            "y": 1142
+        },
+        "status": "ok"
+    },
+    "29": {
+        "coordinates": {
+            "x": 2748,
+            "y": 1264
+        },
+        "status": "ok"
+    },
+    "30": {
+        "coordinates": {
+            "x": 2777,
+            "y": 1289
         },
         "status": "ok"
     }

@@ -2,7 +2,7 @@ from PIL import Image, ImageTk
 import json
 import os
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, Toplevel
 import argparse
 
 class CoordinateSaver:
@@ -28,20 +28,29 @@ class CoordinateSaver:
         # Dictionary to save coordinates
         self.coordinates_data = {}
         self.click_count = 1
-        self.max_clicks = 14
+        self.max_clicks = 30
 
         # Bind the click event
         self.label.bind("<Button-1>", self.save_coordinates)
 
-        # Button to mark as "occluded/missing"
-        self.missing_button = tk.Button(master, text="Occluded/Missing", command=self.mark_missing)
-        self.missing_button.pack()
+        # Frame for bottom controls
+        self.bottom_frame = tk.Frame(master)
+        self.bottom_frame.pack(side="bottom", pady=10)
 
         # Initial instruction message
-        self.show_instruction()
+        self.instruction_label = tk.Label(self.bottom_frame, text=f"Click on point {self.click_count} on the image.")
+        self.instruction_label.pack()
+
+        # Button to mark as "occluded/missing"
+        self.missing_button = tk.Button(self.bottom_frame, text="Occluded/Missing", command=self.mark_missing)
+        self.missing_button.pack(side="left", padx=5)
+
+        # Button to show reference image
+        self.reference_button = tk.Button(self.bottom_frame, text="Show Reference", command=self.show_reference)
+        self.reference_button.pack(side="right", padx=5)
 
     def show_instruction(self):
-        messagebox.showinfo("Instruction", f"Click on point {self.click_count} on the image.")
+        self.instruction_label.config(text=f"Click on point {self.click_count} on the image.")
 
     def save_coordinates(self, event):
         # Calculate coordinates relative to the original image
@@ -75,7 +84,6 @@ class CoordinateSaver:
             "status": "occluded/missing"
         }
         print(json.dumps(self.coordinates_data, indent=4))
-        messagebox.showinfo("Info", f"Point {self.click_count} marked as 'occluded/missing'.")
         self.click_count += 1  # Move to the next point
         if self.click_count <= self.max_clicks:
             self.show_instruction()
@@ -83,6 +91,22 @@ class CoordinateSaver:
             self.save_to_file()  # Save to file when done
             messagebox.showinfo("Finished", "You have clicked all the points!")
             self.master.quit()  # Close the application after saving
+
+    def show_reference(self):
+        # Open a new top-level window
+        ref_window = Toplevel(self.master)
+        ref_window.title("Reference Image")
+        
+        # Load and display the reference image
+        ref_image_path = "court.png"  # Reference image file
+        if os.path.exists(ref_image_path):
+            ref_image = Image.open(ref_image_path)
+            ref_photo = ImageTk.PhotoImage(ref_image)
+            ref_label = tk.Label(ref_window, image=ref_photo)
+            ref_label.image = ref_photo  # Keep a reference
+            ref_label.pack()
+        else:
+            messagebox.showerror("Error", "Reference image not found!")
 
     def save_to_file(self):
         # Create the output filename
@@ -103,7 +127,6 @@ if __name__ == "__main__":
     parser.add_argument("number", type=int, help="The number to append to the image filename.")
     args = parser.parse_args()
 
-    # Construct the image
     # Construct the image path based on the input number
     image_path = f"annotation-images/out{args.number}.jpg"  # Adjust the filename pattern as needed
 

@@ -4,6 +4,7 @@ import json
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import sys
+import calibration.utils.parameters as parameters
 
 # ---------------------------
 # 1. CARICA E PREPARA I DATI
@@ -25,20 +26,7 @@ with open(f'annotation-undist/out{cam2_id}-undist.json') as f:
 
 # Coordinate 3D REALI dei punti del campo (in metri)
 points3D_campo = np.array([
-    [0, 9, 0],
-    [0, 0, 0],
-    [6, 0, 0],
-    [9, 0, 0],
-    [12, 0, 0],
-    [18, 0, 0],
-    [18, 9, 0],
-    [12, 9, 0],
-    [9, 9, 0],
-    [6, 9, 0],
-    [0, 6.9, 0],
-    [0, 2.1, 0],
-    [18, 2.1, 0],
-    [18, 6.9, 0]
+    parameters.WORLD_LABEL_POINTS
 ], dtype=np.float32)
 
 # Funzione per estrarre punti validi dai JSON

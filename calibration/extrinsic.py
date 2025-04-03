@@ -12,7 +12,7 @@ def loadWorldAndImagePoints(cam_id):
     image_points = []
 
     WORLD = parameters.WORLD_LABEL_POINTS
-    label = json.load(open(f'./annotation-dist/out{cam_id}-ann.json'))
+    label = json.load(open(f'../annotation-dist/out{cam_id}-ann.json'))
     
     # Iterate over the sorted ids
     for key in sorted(label.keys(), key=int):
@@ -42,7 +42,7 @@ def main():
     camera_positions = []
     
     # Check if the src-gen folder exists
-    SRC_GEN = parameters.SRC_GEN
+    SRC_GEN = "../src-gen"
     if not os.path.exists(SRC_GEN):
         print(f"> Error: The folder {SRC_GEN} does not exist.")
         return
@@ -50,16 +50,16 @@ def main():
     for cam_id in CAMERA_IDS:
         
         # Load the camera matrix and distortion coefficients
-        camera_matrix = np.loadtxt(f'./src-gen/out{cam_id}F-gen/camera_matrix.txt', dtype=np.float32)
-        dist_coeffs = np.loadtxt(f'./src-gen/out{cam_id}F-gen/distortion_coefficients.txt', dtype=np.float32)
+        camera_matrix = np.loadtxt(f'../src-gen/out{cam_id}F-gen/camera_matrix.txt', dtype=np.float32)
+        dist_coeffs = np.loadtxt(f'../src-gen/out{cam_id}F-gen/distortion_coefficients.txt', dtype=np.float32)
 
         # Caricare il file .pkl
-        with open(f'./src-gen/out{cam_id}F-gen/calibration_data.pkl', 'rb') as file:
+        with open(f'../src-gen/out{cam_id}F-gen/calibration_data.pkl', 'rb') as file:
             dati_pkl = pickle.load(file)
 
         # Stampa il valore desiderato dal file .pkl
         valore_da_stampare = dati_pkl['reprojection_error']
-        print(f"Valore estratto dal file pkl: {valore_da_stampare}")
+        print(f"Reprojection_error for camera {cam_id}: {valore_da_stampare}")
 
 
         # Get the world and image points for the camera
@@ -86,10 +86,10 @@ def main():
         camera_positions.append((cam_id, camera_position, rotation_matrix.T, translation_vector))
 
         # Print the results
-        #print(f"Posizione della camera {cam_id} nel mondo 3D (X, Y, Z in metri):\n")
-        #print(f"{camera_position.flatten()}\n")
-        #print(f"Matrice di rotazione per camera {cam_id}:\n{rotation_matrix}\n")
-        #print(f"Vettore di traslazione per camera {cam_id}:\n{translation_vector.flatten()}\n\n")
+        print(f"Posizione della camera {cam_id} nel mondo 3D (X, Y, Z in metri):\n")
+        print(f"{camera_position.flatten()}\n")
+        print(f"Matrice di rotazione per camera {cam_id}:\n{rotation_matrix}\n")
+        print(f"Vettore di traslazione per camera {cam_id}:\n{translation_vector.flatten()}\n\n")
 
         # Save the extrinsic calibration data in a pickle file
         extrinsic_data = {
@@ -99,7 +99,7 @@ def main():
             'translation_vector': translation_vector
         }
         
-        with open(os.path.join(f'./src-gen/out{cam_id}F-gen', 'calibration_extrinsic.pkl'), 'wb') as pkl_file:
+        with open(os.path.join(f'../src-gen/out{cam_id}F-gen', 'calibration_extrinsic.pkl'), 'wb') as pkl_file:
             pickle.dump(extrinsic_data, pkl_file)
 
 
@@ -109,22 +109,7 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
 
     # Draw the field with labels
-    points3D_campo = np.array([
-        [0, 9, 0],
-        [0, 0, 0],
-        [6, 0, 0],
-        [9, 0, 0],
-        [12, 0, 0],
-        [18, 0, 0],
-        [18, 9, 0],
-        [12, 9, 0],
-        [9, 9, 0],
-        [6, 9, 0],
-        [0, 6.9, 0],
-        [0, 2.1, 0],
-        [18, 2.1, 0],
-        [18, 6.9, 0]
-    ], dtype=np.float32)
+    points3D_campo = np.array(list(parameters.WORLD_LABEL_POINTS.values()), dtype=np.float32)
 
     for i, pt in enumerate(points3D_campo):
         ax.scatter(pt[0], pt[1], pt[2], c='blue', marker='o', s=50)
@@ -158,7 +143,7 @@ def main():
     plt.show()
 
     # Save the 3D visualization image
-    fig.savefig('./src-gen/camera_positions_3D.png', dpi=300)
+    fig.savefig('../src-gen/camera_positions_3D.png', dpi=300)
 
 if __name__ == "__main__":
     main()
