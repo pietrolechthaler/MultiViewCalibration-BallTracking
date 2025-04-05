@@ -28,7 +28,7 @@ class CoordinateSaver:
         # Dictionary to save coordinates
         self.coordinates_data = {}
         self.click_count = 1
-        self.max_clicks = 30
+        self.max_clicks = 36
 
         # Bind the click event
         self.label.bind("<Button-1>", self.save_coordinates)

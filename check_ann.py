@@ -30,10 +30,10 @@ def draw_points_on_image(image_path, json_path, output_path):
             y = int(data["coordinates"]["y"])
             
             # Draw circle and text
-            cv2.circle(image, (x, y), 15, (0, 255, 0), -1)
+            cv2.circle(image, (x, y), 8, (0, 255, 0), -1)
             text = f"ID:{point_id} ({x},{y})"
             cv2.putText(image, text, (x + 20, y + 5), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
     
     # Save the image
     cv2.imwrite(output_path, image)

@@ -1,15 +1,15 @@
 {
     "1": {
         "coordinates": {
-            "x": 3740,
+            "x": 3750,
             "y": 1958
         },
         "status": "ok"
     },
     "2": {
         "coordinates": {
-            "x": 1987,
-            "y": 995
+            "x": 1993,
+            "y": 1001
         },
         "status": "ok"
     },
@@ -23,7 +23,7 @@
     "4": {
         "coordinates": {
             "x": 3235,
-            "y": 844
+            "y": 838
         },
         "status": "ok"
     },
@@ -52,14 +52,14 @@
     "11": {
         "coordinates": {
             "x": 3257,
-            "y": 1686
+            "y": 1689
         },
         "status": "ok"
     },
     "12": {
         "coordinates": {
             "x": 2310,
-            "y": 1177
+            "y": 1174
         },
         "status": "ok"
     },
@@ -94,8 +94,8 @@
     },
     "20": {
         "coordinates": {
-            "x": 1206,
-            "y": 1356
+            "x": 1212,
+            "y": 1360
         },
         "status": "ok"
     },
@@ -107,21 +107,21 @@
     },
     "23": {
         "coordinates": {
-            "x": 3379,
-            "y": 1648
+            "x": 3382,
+            "y": 1644
         },
         "status": "ok"
     },
     "24": {
         "coordinates": {
             "x": 3244,
-            "y": 1574
+            "y": 1577
         },
         "status": "ok"
     },
     "25": {
         "coordinates": {
-            "x": 2556,
+            "x": 2560,
             "y": 1212
         },
         "status": "ok"
@@ -143,6 +143,36 @@
         "status": "occluded/missing"
     },
     "30": {
+        "status": "occluded/missing"
+    },
+    "31": {
+        "status": "occluded/missing"
+    },
+    "32": {
+        "status": "occluded/missing"
+    },
+    "33": {
+        "coordinates": {
+            "x": 3622,
+            "y": 1004
+        },
+        "status": "ok"
+    },
+    "34": {
+        "coordinates": {
+            "x": 2835,
+            "y": 678
+        },
+        "status": "ok"
+    },
+    "35": {
+        "coordinates": {
+            "x": 3584,
+            "y": 1190
+        },
+        "status": "ok"
+    },
+    "36": {
         "status": "occluded/missing"
     }
 }
