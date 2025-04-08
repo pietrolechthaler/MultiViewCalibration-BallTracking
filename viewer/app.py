@@ -39,23 +39,13 @@ def click():
     print(f"> Click: x={x}, y={y}")
 
     # If point is not inside the court, return empty list
-    if(x < 48 or x > 329 or y < 44.125 or y > 183.125):
+    if(x < 64 or x > 436.5 or y < 58 or y > 242.125):
         print("- Click outside the court")
         return jsonify({"status": "failure", "points": []})
 
     # Correspondence points
     points = homography.getCorrespondences(x,y)
-
-
-    for img in ["out1", "out2", "out3", "out4", "out5", "out7", "out8", "out13", "out6", "out12"]:
-
-        # FIXME: this is a simulate behavior (random points)
-        points[img] = {
-            "x": x + random.randint(-10, 10),
-            "y": y + random.randint(-10, 10),
-        }
-
-    print(f"- Points: {points}")
+    #print(f"- Points: {points}")
     return jsonify({"status": "success", "points": points})
 
 if __name__ == '__main__':

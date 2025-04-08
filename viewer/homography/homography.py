@@ -108,7 +108,7 @@ def load_annotations(camera_id):
     Loads the JSON file containing annotations for the camera.
     Annotations must contain key points with view coordinates.
     """
-    ann_file = os.path.join('../../annotation/annotation-dist', f'out{camera_id}-ann.json')
+    ann_file = os.path.join('./annotation/annotation-dist', f'out{camera_id}-ann.json')
     with open(ann_file, 'r') as f:
         annotations = json.load(f)
     return annotations
@@ -164,11 +164,13 @@ def get_camera_point(camera_id, x_world, y_world):
     return x_cam, y_cam
 
 def getCorrespondences(x, y):
+
     # Convert input point from stylized field map to real world
     x_world, y_world = get_world_point(x, y)
-    #print(f"Coordinates of real world: ({x_world:.3f}, {y_world:.3f})")
+    print(f"- Coordinates of real world: ({x_world:.3f}, {y_world:.3f})")
 
     results = {}  # Using regular dict instead of OrderedDict
+
     for cam_id in CAMERA_IDS:
         pt = get_camera_point(cam_id, x_world, y_world)
         if pt is None:
@@ -178,6 +180,7 @@ def getCorrespondences(x, y):
             x_cam = float(round(pt[0], 3))
             y_cam = float(round(pt[1], 3))
             results[f"out{cam_id}"] = {"x": x_cam, "y": y_cam}
+    
     return results
     
 if __name__ == "__main__":
