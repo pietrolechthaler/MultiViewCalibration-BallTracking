@@ -4,9 +4,9 @@ import os
 
 # List of cameras to process
 CAMERA_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 12, 13]
-BASE_IMAGE_PATH = 'annotation-images/out{}.jpg'
-BASE_JSON_PATH = 'annotation-dist/out{}-ann.json'
-OUTPUT_PATH = 'annotation-images/out{}-dist-annotated.jpg'
+BASE_IMAGE_PATH = 'annotation/annotation-images/out{}.jpg'
+BASE_JSON_PATH = 'annotation/annotation-dist/out{}-ann.json'
+OUTPUT_PATH = 'annotation/annotation-images/out{}-dist-annotated.jpg'
 
 def draw_points_on_image(image_path, json_path, output_path):
     # Load the image
