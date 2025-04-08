@@ -34,16 +34,17 @@ def click():
     data = request.json
     x = data.get('x')
     y = data.get('y')
-    label = data.get('label') 
 
-    print(f"Click: x={x}, y={y}, image={label}")
+    print(f"> Click: x={x}, y={y}")
+
+    # If point is not inside the court, return empty list
+    if(x < 48 or x > 329 or y < 44.125 or y > 183.125):
+        print("- Click outside the court")
+        return jsonify({"status": "failure", "points": []})
 
     # Correspondence points
     points = {}
     for img in ["out1", "out2", "out3", "out4", "out5", "out7", "out8", "out13", "out6", "out12"]:
-
-        if img == label:
-            continue
 
         # FIXME: this is a simulate behavior (random points)
         points[img] = {
@@ -51,6 +52,7 @@ def click():
             "y": y + random.randint(-10, 10),
         }
 
+    print(f"- Points: {points}")
     return jsonify({"status": "success", "points": points})
 
 if __name__ == '__main__':
