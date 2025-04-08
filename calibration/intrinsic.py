@@ -47,6 +47,10 @@ def calibrate_camera(folder):
     
     print(f"> Found {len(images)} calibration images")
 
+    
+    images = utils.ranking_images(images, top_n=parameters.TOP_N)
+    print(f"> Selected top {len(images)} sharpest images for calibration")
+    
     # Create output folder if it doesn't exist
     folder_name = os.path.basename(folder)
     out_name = folder_name + parameters.OUT

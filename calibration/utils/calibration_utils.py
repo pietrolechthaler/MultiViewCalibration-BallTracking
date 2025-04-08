@@ -76,3 +76,15 @@ def undistort_images(mtx, dist, folder):
         print(f"- Undistorted image {idx+1}/{len(images)}: {fname}")
     
     print(f"- Undistorted images saved to {undistorted_dir}")
+
+def ranking_images(images, top_n=30):
+    sharpness_scores = []
+    for fname in images:
+        img = cv2.imread(fname, cv2.IMREAD_GRAYSCALE)
+        sharpness = cv2.Laplacian(img, cv2.CV_64F).var()
+        sharpness_scores.append((sharpness, fname))
+
+    # Sort by sharpness descending
+    sharpness_scores.sort(reverse=True)
+    top_images = [fname for (_, fname) in sharpness_scores[:top_n]]
+    return top_images

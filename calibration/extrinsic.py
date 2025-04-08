@@ -78,11 +78,6 @@ def main():
 
         # Compute the camera position
         camera_position = -np.dot(rotation_matrix.T, translation_vector)
-
-        # Invert Z to have positive = up
-        # camera_position[2] *= -1
-        # rotation_matrix[:, 2] *= -1
-        # translation_vector[2] *= -1
         camera_positions.append((cam_id, camera_position, rotation_matrix.T, translation_vector))
 
         # Print the results

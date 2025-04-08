@@ -13,12 +13,10 @@ VIDEO_PATHS = [
     ['./video/board/out13F.mp4', (7,5)],
 ]
 
-# VIDEO_PATHS = [
-#     ['./video/board/out12F.mp4', (7,5)],
-# ]
-
 SKIP_FRAMES = 10
 SQUARE_SIZE = 28 #mm
+
+TOP_N = 40
 
 OUT = "-gen"
 DISTORTION = "-distortion"
@@ -26,7 +24,7 @@ JSON_CHESSBOARD = "chessboard.json"
 SRC_GEN = './src-gen'
 SETUP = "./setup.json"
 LANDMARKS = "landmarks.json"
-SAVE_UNDISTORTED = True
+SAVE_UNDISTORTED = False
 
 WORLD_LABEL_POINTS = {
     '1': [-9, -4.5, 0],

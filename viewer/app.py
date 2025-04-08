@@ -1,5 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 import random
+import homography.homography as homography
 
 app = Flask(__name__)
 
@@ -43,7 +44,9 @@ def click():
         return jsonify({"status": "failure", "points": []})
 
     # Correspondence points
-    points = {}
+    points = homography.getCorrespondences(x,y)
+
+
     for img in ["out1", "out2", "out3", "out4", "out5", "out7", "out8", "out13", "out6", "out12"]:
 
         # FIXME: this is a simulate behavior (random points)
