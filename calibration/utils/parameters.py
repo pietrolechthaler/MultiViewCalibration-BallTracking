@@ -1,4 +1,5 @@
 # Parameters
+import numpy as np
 
 VIDEO_PATHS = [
     ['./video/board/out1F.mp4', (7,5)],
@@ -13,7 +14,7 @@ VIDEO_PATHS = [
     ['./video/board/out13F.mp4', (7,5)],
 ]
 
-SKIP_FRAMES = 10
+SKIP_FRAMES = 25
 SQUARE_SIZE = 28 #mm
 
 TOP_N = 40
@@ -64,5 +65,18 @@ WORLD_LABEL_POINTS = {
     '35': [-3, 0, 0],
     '36': [3, 0, 0]
 }
+
+REAL_WORLD_CAMERA_POSITIONS = [
+        np.array([-14.5, -17.7, 6.2]),  # Posizione della camera 1
+        np.array([0.0, -17.7, 6.2]),  # Posizione della camera 2
+        np.array([-22.0, -10.0, 6.6]),  # Posizione della camera 3
+        np.array([14.5, -17.7, 6.2]),  # Posizione della camera 4
+        np.array([-22.0, 10.0, 5.8]),  # Posizione della camera 5
+        np.array([0.0, 10.0, 6.3]),  # Posizione della camera 6
+        np.array([25.0, 0.0, 6.4]),  # Posizione della camera 7
+        np.array([22.0, 10.0, 6.3]),  # Posizione della camera 8
+        np.array([22.0, -10.0, 6.9]),  # Posizione della camera 12
+        np.array([-22.0, 0.0, 7]),  # Posizione della camera 13
+    ]
 
 CAMERA_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 12, 13]

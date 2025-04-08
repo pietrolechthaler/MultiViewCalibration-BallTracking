@@ -48,7 +48,7 @@ def calibrate_camera(folder):
     print(f"> Found {len(images)} calibration images")
 
     
-    images = utils.ranking_images(images, top_n=parameters.TOP_N)
+    #images = utils.ranking_images(images, top_n=parameters.TOP_N)
     print(f"> Selected top {len(images)} sharpest images for calibration")
     
     # Create output folder if it doesn't exist
@@ -66,15 +66,15 @@ def calibrate_camera(folder):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
         # Find the chessboard corners
-        ret, corners = cv2.findChessboardCorners(gray, chessboard_size, None)
+        ret, corners = cv2.findChessboardCorners(gray, chessboard_size, None, flags=cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_FAST_CHECK)
         
         # If found, add object points and image points
         if ret:
             objpoints.append(objp)
             
             # Refine corner positions
-            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-            corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+            criteria = (cv2.TERM_CRITERIA_COUNT + cv2.TERM_CRITERIA_EPS, 40, 0.01)
+            corners2 = cv2.cornerSubPix(gray, corners, (10, 10), (-1, -1), criteria)
             imgpoints.append(corners2)
             
             # Draw and display the corners

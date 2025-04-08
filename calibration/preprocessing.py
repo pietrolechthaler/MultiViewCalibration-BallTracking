@@ -4,7 +4,7 @@ Description: This script extracts frames from video files for camera calibration
 """
 import cv2
 import os
-import parameters
+import utils.parameters as parameters
 import json
 
 def dimensions_to_json(output_path, chessboard_size):
@@ -41,7 +41,7 @@ def find_chessboard(image, grid_size):
         bool: True if chessboard is found, False otherwise.
     """
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    return cv2.findChessboardCorners(gray, grid_size)[0]
+    return cv2.findChessboardCorners(gray, grid_size, None, flags=cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_FAST_CHECK)[0]
 
 def extract_frames(video_paths, skip_frames, output_folder): 
     """

@@ -35,9 +35,57 @@ def loadWorldAndImagePoints(cam_id):
 
     return w_points, i_points
 
+def visualize_camera_positions(camera_positions, real_camera_positions=None):
+    # 3D Visualization
+    fig = plt.figure(figsize=(12, 8))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # # Draw the field with labels
+    points3D_campo = np.array(list(parameters.WORLD_LABEL_POINTS.values()), dtype=np.float32)
+
+    for i, pt in enumerate(points3D_campo):
+        ax.scatter(pt[0], pt[1], pt[2], c='red', marker='o', s=30)
+        ax.text(pt[0], pt[1], pt[2], f'C{i+1}', color='red', fontsize=8)
+
+    # Draw the cameras with labels and axes
+    def draw_camera(ax, tvec, R, color, label):
+        tvec = tvec.flatten()
+        ax.scatter(tvec[0], tvec[1], tvec[2], c=color, s=100, label=label)
+        axis_length = 3
+
+        # Only draw the Z-axis
+        z_axis = R[:, 2]  # Get the Z-axis direction
+        end_point = tvec + axis_length * z_axis 
+        ax.quiver(tvec[0], tvec[1], tvec[2], z_axis[0], z_axis[1], z_axis[2],
+                length=axis_length, color='b', linewidth=2)  # Draw Z-axis in blue
+
+        ax.text(tvec[0], tvec[1], tvec[2], label, color=color, fontsize=10)  # Label camera
+
+
+    # Draw all the cameras
+    for idx, (cam_id, camera_position, rotation_matrix, translation_vector) in enumerate(camera_positions):
+        color = 'blue'  # Set a fixed color for all cameras
+        draw_camera(ax, camera_position, rotation_matrix, color, f'Calc {cam_id}')
+
+    # Draw real camera positions if provided
+    if real_camera_positions is not None:
+        for idx, real_position in enumerate(real_camera_positions):
+            ax.scatter(real_position[0], real_position[1], real_position[2], c='orange', s=100, label=f'Real Camera {idx+1}')
+            ax.text(real_position[0], real_position[1], real_position[2], f'Real {idx+1}', color='orange')
+
+    ax.set_xlabel('X (m)')
+    ax.set_ylabel('Y (m)')
+    ax.set_zlabel('Z (m)')
+    ax.set_title('3D Visualization of Camera Positions')
+    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.show()
+
+    # Save the 3D visualization image
+    fig.savefig('../src-gen/camera_positions_3D.png', dpi=300)
+
 
 def main():
-
     CAMERA_IDS = parameters.CAMERA_IDS
     camera_positions = []
     
@@ -52,15 +100,6 @@ def main():
         # Load the camera matrix and distortion coefficients
         camera_matrix = np.loadtxt(f'../src-gen/out{cam_id}F-gen/camera_matrix.txt', dtype=np.float32)
         dist_coeffs = np.loadtxt(f'../src-gen/out{cam_id}F-gen/distortion_coefficients.txt', dtype=np.float32)
-
-        # Caricare il file .pkl
-        with open(f'../src-gen/out{cam_id}F-gen/calibration_data.pkl', 'rb') as file:
-            dati_pkl = pickle.load(file)
-
-        # Stampa il valore desiderato dal file .pkl
-        valore_da_stampare = dati_pkl['reprojection_error']
-        print(f"Reprojection_error for camera {cam_id}: {valore_da_stampare}")
-
 
         # Get the world and image points for the camera
         world_points, image_points = loadWorldAndImagePoints(cam_id)
@@ -81,10 +120,7 @@ def main():
         camera_positions.append((cam_id, camera_position, rotation_matrix.T, translation_vector))
 
         # Print the results
-        print(f"Posizione della camera {cam_id} nel mondo 3D (X, Y, Z in metri):\n")
-        print(f"{camera_position.flatten()}\n")
-        print(f"Matrice di rotazione per camera {cam_id}:\n{rotation_matrix}\n")
-        print(f"Vettore di traslazione per camera {cam_id}:\n{translation_vector.flatten()}\n\n")
+        print(f"Camera {cam_id} :" , camera_position.flatten())
 
         # Save the extrinsic calibration data in a pickle file
         extrinsic_data = {
@@ -97,48 +133,8 @@ def main():
         with open(os.path.join(f'../src-gen/out{cam_id}F-gen', 'calibration_extrinsic.pkl'), 'wb') as pkl_file:
             pickle.dump(extrinsic_data, pkl_file)
 
-
-    # 3D Visualization
-    colors = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow', 'orange', 'purple', 'pink']
-    fig = plt.figure(figsize=(12, 8))
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Draw the field with labels
-    points3D_campo = np.array(list(parameters.WORLD_LABEL_POINTS.values()), dtype=np.float32)
-
-    for i, pt in enumerate(points3D_campo):
-        ax.scatter(pt[0], pt[1], pt[2], c='blue', marker='o', s=50)
-        ax.text(pt[0], pt[1], pt[2], f'C{i+1}', color='blue')
-
-    # Draw the cameras with labels and axes
-    def draw_camera(ax, tvec, R, color, label):
-        tvec = tvec.flatten()
-        ax.scatter(tvec[0], tvec[1], tvec[2], c=color, s=100, label=label)
-        axis_length = 1.5 
-
-        # Camera axes
-        for col, axis in zip(['r', 'g', 'b'], [R[:, 0], R[:, 1], R[:, 2]]):
-            end_point = tvec + axis_length * axis 
-            ax.quiver(tvec[0], tvec[1], tvec[2], axis[0], axis[1], axis[2],
-                    length=axis_length, color=col, linewidth=2)
-
-        ax.text(tvec[0], tvec[1], tvec[2], label, color=color)  # Label camera
-
-    # Draw all the cameras
-    for idx, (cam_id, camera_position, rotation_matrix, translation_vector) in enumerate(camera_positions):
-        color = colors[idx % len(colors)]
-        draw_camera(ax, camera_position, rotation_matrix, color, f'Camera {cam_id}')
-
-    ax.set_xlabel('X (m)')
-    ax.set_ylabel('Y (m)')
-    ax.set_zlabel('Z (m)')
-    ax.set_title('3D Visualization of Camera Positions')
-    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-    plt.tight_layout()
-    plt.show()
-
-    # Save the 3D visualization image
-    fig.savefig('../src-gen/camera_positions_3D.png', dpi=300)
+    # Call the visualization function
+    visualize_camera_positions(camera_positions, parameters.REAL_WORLD_CAMERA_POSITIONS)
 
 if __name__ == "__main__":
     main()
