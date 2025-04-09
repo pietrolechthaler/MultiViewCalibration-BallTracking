@@ -81,7 +81,6 @@ def get_world_point(x, y):
 def load_annotations(camera_id):
     """
     Loads the JSON file containing annotations for the camera.
-    Annotations must contain key points with view coordinates.
     """
     ann_file = os.path.join('./annotation/annotation-dist', f'out{camera_id}-ann.json')
     with open(ann_file, 'r') as f:
@@ -90,8 +89,7 @@ def load_annotations(camera_id):
 
 def find_homography_field(camera_id):
     """
-    Calculates the homography matrix that transforms points from the real world 
-    (defined by WORLD_LABEL_POINTS) to the camera view. 
+    Calculates and returns the homography matrix. 
     """
 
     ann = load_annotations(camera_id)
@@ -130,8 +128,7 @@ def find_homography_field(camera_id):
 
 def get_camera_point(camera_id, x_world, y_world):
     """
-    Transforms point (x_world, y_world) from the real world to the camera view.
-    into coordinates of the camera view identified by camera_id.
+    Transforms point (x_world, y_world) from the real world into coordinates of the camera view identified by camera_id.
     """
     H = find_homography_field(camera_id)
     if H is None:
@@ -143,8 +140,9 @@ def get_camera_point(camera_id, x_world, y_world):
     return x_cam, y_cam
 
 def getCorrespondences(x_world, y_world):
-
-    results = {}  # Using regular dict instead of OrderedDict
+    '''Converts world coordinates (x_world, y_world) to camera coordinates for all cameras.
+    Returns a dictionary with camera IDs as keys and their respective coordinates as values.'''
+    results = {}  
 
     for cam_id in CAMERA_IDS:
         pt = get_camera_point(cam_id, x_world, y_world)

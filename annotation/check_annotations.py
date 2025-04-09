@@ -2,7 +2,6 @@ import cv2
 import json
 import os
 
-# List of cameras to process
 CAMERA_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 12, 13]
 BASE_IMAGE_PATH = 'annotation/annotation-images/out{}.jpg'
 BASE_JSON_PATH = 'annotation/annotation-dist/out{}-ann.json'

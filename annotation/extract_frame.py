@@ -6,9 +6,11 @@ import cv2
 import numpy as np
 
 # Configuration
-INPUT_DIR = "video/match"
-OUTPUT_DIR = "src-gen/landsmark"
-CALIB_ROOT = "src-gen"
+INPUT_DIR = "../video/match"
+OUTPUT_DIR = "../src-gen/landsmark"
+CALIB_ROOT = "../src-gen"
+
+CAMERA_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 12, 13]
 
 def load_calibration_files(calib_folder):
     """
@@ -25,7 +27,7 @@ def load_calibration_files(calib_folder):
 
 def undistort_single_image(mtx, dist, img_path, output_path):
     """
-    Apply undistortion to single image using OpenCV
+    Apply undistortion to single image and save the result.
     """
     try:
         img = cv2.imread(img_path)
@@ -102,14 +104,14 @@ def process_single_video(i, time_sec):
     return undistort_single_image(mtx, dist, input_img, output_img)
 
 def main():
-    parser = argparse.ArgumentParser(description='Process video frames with undistortion.')
-    parser.add_argument('i', type=int, help='Index number (1-13)')
-    parser.add_argument('time', type=float, help='Time in seconds to extract frame from video')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('i', type=int)
+    parser.add_argument('time', type=float)
     
     args = parser.parse_args()
     
-    if not 1 <= args.i <= 13:
-        print("Error: i must be between 1 and 13")
+    if not args.i in CAMERA_IDS:
+        print("Error: camera ID must be one of the following: ", CAMERA_IDS)
         sys.exit(1)
     
     # Create output directory
