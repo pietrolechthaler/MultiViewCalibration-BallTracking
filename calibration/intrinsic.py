@@ -47,8 +47,8 @@ def calibrate_camera(folder):
     
     print(f"> Found {len(images)} calibration images")
 
-    
-    #images = utils.ranking_images(images, top_n=parameters.TOP_N)
+    # Sort images by sharpness
+    images = utils.ranking_images(images, top_n=parameters.TOP_N)
     print(f"> Selected top {len(images)} sharpest images for calibration")
     
     # Create output folder if it doesn't exist
@@ -141,6 +141,7 @@ def main():
         subfolder_path = os.path.join(SRC_GEN, subfolder_name)
         
         if os.path.isdir(subfolder_path):
+            
             # Calibrate the camera
             ret, mtx, dist, rvecs, tvecs = calibrate_camera(subfolder_path)
             

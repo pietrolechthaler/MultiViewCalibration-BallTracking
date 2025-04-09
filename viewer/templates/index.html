@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Computer Vision Project</h1>
+    <h1>3D Camera Calibration (Geometry and 3D Reconstruction)</h1>
     <p>Click on the volleyball court to view the corresponding point on the cameras</p>
 
     <div class="image-row">
@@ -22,7 +22,7 @@
         const courtImage = document.getElementById('courtImage');
         const imageContainer = document.getElementById('imageContainer');
 
-        // Load images initially
+        // Load images
         fetch('/images')
             .then(response => response.json())
             .then(images => {
@@ -35,10 +35,9 @@
                     img.dataset.index = image.label;
                     img.id = image.label;
 
-                    // Salva le dimensioni originali come attributi dell'immagine
+                    // Set the original dimensions as data attributes
                     img.dataset.originalWidth = image.originalWidth;
                     img.dataset.originalHeight = image.originalHeight;
-                    console.log(`Original dimensions of ${image.label}: ${image.originalWidth}x${image.originalHeight}`);
 
                     const label = document.createElement('p');
                     label.textContent = image.label;
@@ -55,6 +54,7 @@
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
 
+            // Send the click coordinates to the server
             fetch('/click', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -66,10 +66,9 @@
             });
         });
 
-        
-
         // Function to display corresponding points on the images
         function displayCorrespondingPoints(points) {
+            // Remove existing point markers
             document.querySelectorAll('.point-marker').forEach(marker => marker.remove());
 
             Object.entries(points).forEach(([label, coords]) => {
@@ -78,24 +77,23 @@
                     const rect = img.getBoundingClientRect();
                     const imgContainer = img.parentElement;
 
-                    // Calcola i fattori di scala utilizzando le dimensioni originali
+                    // Calculate the scale based on the original dimensions
                     const originalWidth = img.dataset.originalWidth;
                     const originalHeight = img.dataset.originalHeight;
 
-                    // Assicurati che le dimensioni originali siano disponibili
                     if (originalWidth && originalHeight) {
                         const scaleX = rect.width / originalWidth;
                         const scaleY = rect.height / originalHeight;
 
-                        // Scala le coordinate
+                        // New coordinates based on the original dimensions
                         const scaledX = coords.x * scaleX;
                         const scaledY = coords.y * scaleY;
 
-                        // Controlla se le coordinate scalate sono all'interno dei limiti dell'immagine
+                        // Display the point marker only if it's within the image bounds
                         if (scaledX >= 0 && scaledX <= rect.width && scaledY >= 0 && scaledY <= rect.height) {
                             const pointMarker = document.createElement('div');
                             pointMarker.className = 'point-marker';
-                            pointMarker.style.position = 'absolute'; // Assicurati che il marker sia posizionato correttamente
+                            pointMarker.style.position = 'absolute';
                             pointMarker.style.left = `${scaledX}px`;
                             pointMarker.style.top = `${scaledY}px`;
 
@@ -105,7 +103,6 @@
                 }
             });
         }
-
     </script>
 </body>
 </html>

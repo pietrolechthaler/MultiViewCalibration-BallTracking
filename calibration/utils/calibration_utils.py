@@ -1,7 +1,3 @@
-"""
-Author: Pietro Lechthaler
-Description: 
-"""
 import json
 import os
 import utils.parameters as parameters
@@ -11,12 +7,13 @@ import cv2
 
 def read_chessboard_dimensions(folder):
     """
-    Read the chessboard dimensions from a JSON file.
-    @params:
+    Read the chessboard dimensions from a JSON file
+    Args:
         json_path (str): Path to the folder containing the json with chessboard dimensions.
     @return:
-        tuple: Tuple containing the dimensions of the chessboard (rows,, columns)
+        tuple: Tuple containing the dimensions of the chessboard (rows, columns)
     """
+   
     # Load the JSON file
     filename = parameters.JSON_CHESSBOARD
     json_path = os.path.join(folder, filename)
@@ -31,7 +28,7 @@ def read_chessboard_dimensions(folder):
 
 def undistort_images(mtx, dist, folder):
     """
-    Undistort all calibration images using the calibration results.
+    Undistort all calibration images using the calibration results
     
     Args:
         mtx: Camera matrix
@@ -78,6 +75,15 @@ def undistort_images(mtx, dist, folder):
     print(f"- Undistorted images saved to {undistorted_dir}")
 
 def ranking_images(images, top_n=30):
+    """
+    Rank images based on sharpness and return the top N images.
+    
+    Args:
+        images: List of image file paths
+        top_n: Number of top images to return based on sharpness
+    @return:
+        List of top N image file paths
+    """
     sharpness_scores = []
     for fname in images:
         img = cv2.imread(fname, cv2.IMREAD_GRAYSCALE)

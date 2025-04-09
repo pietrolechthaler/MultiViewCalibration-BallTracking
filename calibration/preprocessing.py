@@ -1,7 +1,3 @@
-"""
-Author: Pietro Lechthaler
-Description: This script extracts frames from video files for camera calibration purposes.
-"""
 import cv2
 import os
 import utils.parameters as parameters
@@ -98,9 +94,9 @@ Run the script: python3 preprocessing.py
 if __name__ == "__main__":
    
     # Parameters
-    VIDEO_PATHS = parameters.VIDEO_PATHS
+    CALIBRATION_VIDEO = parameters.CALIBRATION_VIDEO
     SKIP_FRAMES = parameters.SKIP_FRAMES
     SRC_GEN = parameters.SRC_GEN
 
     # Run the function
-    extract_frames(VIDEO_PATHS, SKIP_FRAMES, SRC_GEN)
+    extract_frames(CALIBRATION_VIDEO, SKIP_FRAMES, SRC_GEN)

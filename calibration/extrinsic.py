@@ -4,7 +4,7 @@ import json
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import utils.parameters as parameters
-import sys, os
+import os
 import pickle
 
 def loadWorldAndImagePoints(cam_id):
@@ -12,7 +12,7 @@ def loadWorldAndImagePoints(cam_id):
     image_points = []
 
     WORLD = parameters.WORLD_LABEL_POINTS
-    label = json.load(open(f'../annotation-dist/out{cam_id}-ann.json'))
+    label = json.load(open(f'./annotation/annotation-dist/out{cam_id}-ann.json'))
     
     # Iterate over the sorted ids
     for key in sorted(label.keys(), key=int):
@@ -40,7 +40,7 @@ def visualize_camera_positions(camera_positions, real_camera_positions=None):
     fig = plt.figure(figsize=(12, 8))
     ax = fig.add_subplot(111, projection='3d')
 
-    # # Draw the field with labels
+    # Draw the field with labels
     points3D_campo = np.array(list(parameters.WORLD_LABEL_POINTS.values()), dtype=np.float32)
 
     for i, pt in enumerate(points3D_campo):
@@ -60,7 +60,6 @@ def visualize_camera_positions(camera_positions, real_camera_positions=None):
                 length=axis_length, color='b', linewidth=2)  # Draw Z-axis in blue
 
         ax.text(tvec[0], tvec[1], tvec[2], label, color=color, fontsize=10)  # Label camera
-
 
     # Draw all the cameras
     for idx, (cam_id, camera_position, rotation_matrix, translation_vector) in enumerate(camera_positions):
@@ -82,7 +81,7 @@ def visualize_camera_positions(camera_positions, real_camera_positions=None):
     plt.show()
 
     # Save the 3D visualization image
-    fig.savefig('../src-gen/camera_positions_3D.png', dpi=300)
+    fig.savefig('./src-gen/camera_positions_3D.png', dpi=300)
 
 
 def main():
@@ -90,7 +89,7 @@ def main():
     camera_positions = []
     
     # Check if the src-gen folder exists
-    SRC_GEN = "../src-gen"
+    SRC_GEN = parameters.SRC_GEN
     if not os.path.exists(SRC_GEN):
         print(f"> Error: The folder {SRC_GEN} does not exist.")
         return
@@ -98,8 +97,8 @@ def main():
     for cam_id in CAMERA_IDS:
         
         # Load the camera matrix and distortion coefficients
-        camera_matrix = np.loadtxt(f'../src-gen/out{cam_id}F-gen/camera_matrix.txt', dtype=np.float32)
-        dist_coeffs = np.loadtxt(f'../src-gen/out{cam_id}F-gen/distortion_coefficients.txt', dtype=np.float32)
+        camera_matrix = np.loadtxt(f'./src-gen/out{cam_id}F-gen/camera_matrix.txt', dtype=np.float32)
+        dist_coeffs = np.loadtxt(f'./src-gen/out{cam_id}F-gen/distortion_coefficients.txt', dtype=np.float32)
 
         # Get the world and image points for the camera
         world_points, image_points = loadWorldAndImagePoints(cam_id)
@@ -130,7 +129,7 @@ def main():
             'translation_vector': translation_vector
         }
         
-        with open(os.path.join(f'../src-gen/out{cam_id}F-gen', 'calibration_extrinsic.pkl'), 'wb') as pkl_file:
+        with open(os.path.join(f'./src-gen/out{cam_id}F-gen', 'calibration_extrinsic.pkl'), 'wb') as pkl_file:
             pickle.dump(extrinsic_data, pkl_file)
 
     # Call the visualization function

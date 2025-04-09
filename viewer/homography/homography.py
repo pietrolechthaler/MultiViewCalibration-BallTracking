@@ -44,7 +44,6 @@ WORLD_LABEL_POINTS = {
 
 CAMERA_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 12, 13]
 
-import numpy as np
 
 def get_world_point(x, y):
     world_corners = np.array([

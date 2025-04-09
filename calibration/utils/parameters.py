@@ -1,7 +1,7 @@
-# Parameters
 import numpy as np
 
-VIDEO_PATHS = [
+# Video paths and associated chessboard dimensions
+CALIBRATION_VIDEO = [
     ['./video/board/out1F.mp4', (7,5)],
     ['./video/board/out2F.mp4', (7,5)],
     ['./video/board/out3F.mp4', (7,5)],
@@ -14,19 +14,29 @@ VIDEO_PATHS = [
     ['./video/board/out13F.mp4', (7,5)],
 ]
 
+# Number of frames to skip during processing
 SKIP_FRAMES = 25
-SQUARE_SIZE = 28 #mm
 
+# Size of the chessboard square in millimeters
+SQUARE_SIZE = 28
+
+# Maximum number of images to consider in ranking procedure
 TOP_N = 40
 
+# Suffix for generated files
 OUT = "-gen"
 DISTORTION = "-distortion"
+
+# Name of the JSON file containing chessboard dimensions
 JSON_CHESSBOARD = "chessboard.json"
+
+# Path to the folder for generated files
 SRC_GEN = './src-gen'
-SETUP = "./setup.json"
-LANDMARKS = "landmarks.json"
+
+# Flag to save undistorted images
 SAVE_UNDISTORTED = False
 
+# World reference points for calibration
 WORLD_LABEL_POINTS = {
     '1': [-9, -4.5, 0],
     '2': [-9, 4.5, 0],
@@ -66,17 +76,19 @@ WORLD_LABEL_POINTS = {
     '36': [3, 0, 0]
 }
 
+# Real-world camera positions
 REAL_WORLD_CAMERA_POSITIONS = [
-        np.array([-14.5, -17.7, 6.2]),  # Posizione della camera 1
-        np.array([0.0, -17.7, 6.2]),  # Posizione della camera 2
-        np.array([-22.0, -10.0, 6.6]),  # Posizione della camera 3
-        np.array([14.5, -17.7, 6.2]),  # Posizione della camera 4
-        np.array([-22.0, 10.0, 5.8]),  # Posizione della camera 5
-        np.array([0.0, 10.0, 6.3]),  # Posizione della camera 6
-        np.array([25.0, 0.0, 6.4]),  # Posizione della camera 7
-        np.array([22.0, 10.0, 6.3]),  # Posizione della camera 8
-        np.array([22.0, -10.0, 6.9]),  # Posizione della camera 12
-        np.array([-22.0, 0.0, 7]),  # Posizione della camera 13
+        np.array([-14.5, -17.7, 6.2]),  # out1
+        np.array([0.0, -17.7, 6.2]),    # out2
+        np.array([-22.0, -10.0, 6.6]),  # out3
+        np.array([14.5, -17.7, 6.2]),   # out4
+        np.array([-22.0, 10.0, 5.8]),   # out5
+        np.array([0.0, 10.0, 6.3]),     # out6
+        np.array([25.0, 0.0, 6.4]),     # out7
+        np.array([22.0, 10.0, 6.3]),    # out8
+        np.array([22.0, -10.0, 6.9]),   # out12
+        np.array([-22.0, 0.0, 7]),      # out13
     ]
 
+# Camera identifiers
 CAMERA_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 12, 13]

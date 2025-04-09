@@ -1,9 +1,9 @@
 # Ignore all files in the video folder
-video/
-papers/
+*.mp4
 .DS_Store
 src-gen/
 __pycache__/
 env/
+papers/
 tracking/
 old code/
