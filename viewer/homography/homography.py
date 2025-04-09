@@ -44,64 +44,40 @@ WORLD_LABEL_POINTS = {
 
 CAMERA_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 12, 13]
 
-SKETCH_LABEL_POINTS = {
-    '1': [48, 183.125, 0],
-    '2': [48, 44.125, 0],
-    '3': [141.667, 44.125, 0],
-    '4': [188.5, 44.125, 0],
-    '5': [235.333, 44.125, 0],
-    '6': [329, 44.125, 0],
-    '7': [329, 183.125, 0],
-    '8': [235.333, 183.125, 0],
-    '9': [188.5, 183.125, 0],
-    '10': [141.667, 183.125, 0],
-    '11': [48, 151.464, 0],
-    '12': [48, 75.786, 0],
-    '13': [329, 75.786, 0],
-    '14': [329, 151.464, 0],
-    '15': [-30.056, 229.458, 0],
-    '16': [-30.056, -2.208, 0],
-    '17': [407.056, -2.208, 0],
-    '18': [407.056, 229.458, 0],
-    '19': [-30.056, 151.464, 0],
-    '20': [-30.056, 75.786, 0],
-    '21': [407.056, 75.786, 0],
-    '22': [407.056, 151.464, 0],
-    '23': [60.489, 151.464, 0],
-    '24': [60.489, 140.653, 0],
-    '25': [60.489, 86.597, 0],
-    '26': [60.489, 75.786, 0],
-    '27': [316.511, 75.786, 0],
-    '28': [316.511, 86.597, 0],
-    '29': [316.511, 140.653, 0],
-    '30': [316.511, 151.464, 0],
-    '31': [188.5, 229.458, 0],
-    '32': [188.5, 140.653, 0],
-    '33': [188.5, 86.597, 0],
-    '34': [188.5, -2.208, 0],
-    '35': [141.667, 113.625, 0],
-    '36': [235.333, 113.625, 0]
-}
+import numpy as np
 
-def get_world_point(x_stylized, y_stylized):
-    """
-    Converts a point from the stylized field map image (in pixels)
-    to the real world using the mapping defined by correspondences.
-    Only x and y components are considered (ignoring the z component).
-    """
-    # Known points in the field map (in pixels)
-    src_pts = np.array([[SKETCH_LABEL_POINTS[str(i)][0], SKETCH_LABEL_POINTS[str(i)][1]] 
-                    for i in range(1,37)], dtype=np.float32).reshape(-1, 1, 2)
+def get_world_point(x, y):
+    world_corners = np.array([
+        [-9, -4.5, 0],
+        [-9, 4.5, 0],
+        [9, 4.5, 0],
+        [9, -4.5, 0]
+    ])
+
+    court_corners = np.array([
+        [63, 241.125, 0],
+        [63, 57.125, 0],
+        [438, 57.125, 0],
+        [438, 241.125, 0],
+    ])
+
+    # Check if point is inside the court
+    if (x < court_corners[0, 0] or x > court_corners[2, 0] or y < court_corners[1, 1] or y > court_corners[0, 1]):
+        return None,None  #outside
+
+    # Calculate the width and height of the court and world
+    court_width = court_corners[2, 0] - court_corners[0, 0]
+    court_height = court_corners[0, 1] - court_corners[1, 1]
     
-    # Corresponding real-world coordinates (extracted from WORLD_LABEL_POINTS)
-    dst_pts = np.array([[WORLD_LABEL_POINTS[str(i)][0], WORLD_LABEL_POINTS[str(i)][1]] 
-                    for i in range(1,37)], dtype=np.float32).reshape(-1, 1, 2)
-    
-    # Calculate homography from field map to world coordinate system
-    H_field, _ = cv2.findHomography(src_pts, dst_pts, method=0)
-    input_pt = np.array([[x_stylized, y_stylized]], dtype=np.float32).reshape(-1, 1, 2)
-    world_pt = cv2.perspectiveTransform(input_pt, H_field)
-    return world_pt[0][0]  # Returns (x, y) in the real world
+    world_width = world_corners[2, 0] - world_corners[0, 0]
+    world_height = world_corners[0, 1] - world_corners[1, 1]
+
+    # Calculate the world coordinates
+    world_x = ((x - court_corners[0, 0]) / court_width) * world_width + world_corners[0, 0]
+    world_y = ((y - court_corners[1, 1]) / court_height) * world_height + world_corners[1, 1]
+
+    return world_x, world_y
+
 
 def load_annotations(camera_id):
     """
@@ -118,7 +94,9 @@ def find_homography_field(camera_id):
     Calculates the homography matrix that transforms points from the real world 
     (defined by WORLD_LABEL_POINTS) to the camera view. 
     """
+
     ann = load_annotations(camera_id)
+
     src_pts = []  # Points from WORLD_LABEL_POINTS
     dst_pts = []  # Points from annotations
     
@@ -137,11 +115,12 @@ def find_homography_field(camera_id):
                 ann[point_id]["coordinates"]["y"]
             ])
 
-    #print(f"Camera {camera_id}: {len(src_pts)} common points found.")
+    print(f"Camera {camera_id}: {len(src_pts)} common points found.")
 
     if len(src_pts) < 4:
         print(f"Not enough common points to calculate homography for camera out{camera_id}.")
         return None
+    
     src_pts = np.array(src_pts, dtype=np.float32).reshape(-1, 1, 2)
     dst_pts = np.array(dst_pts, dtype=np.float32).reshape(-1, 1, 2)
     
@@ -158,21 +137,19 @@ def get_camera_point(camera_id, x_world, y_world):
     H = find_homography_field(camera_id)
     if H is None:
         return None
+    
     src_pt = np.array([[x_world, y_world]], dtype=np.float32).reshape(-1, 1, 2)
     transformed_pts = cv2.perspectiveTransform(src_pt, H)
     x_cam, y_cam = transformed_pts[0][0]
     return x_cam, y_cam
 
-def getCorrespondences(x, y):
-
-    # Convert input point from stylized field map to real world
-    x_world, y_world = get_world_point(x, y)
-    print(f"- Coordinates of real world: ({x_world:.3f}, {y_world:.3f})")
+def getCorrespondences(x_world, y_world):
 
     results = {}  # Using regular dict instead of OrderedDict
 
     for cam_id in CAMERA_IDS:
         pt = get_camera_point(cam_id, x_world, y_world)
+        
         if pt is None:
             print(f"Transformation failed for camera out{cam_id}.")
         else:

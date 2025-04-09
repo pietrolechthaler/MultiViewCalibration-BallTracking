@@ -35,6 +35,11 @@
                     img.dataset.index = image.label;
                     img.id = image.label;
 
+                    // Salva le dimensioni originali come attributi dell'immagine
+                    img.dataset.originalWidth = image.originalWidth;
+                    img.dataset.originalHeight = image.originalHeight;
+                    console.log(`Original dimensions of ${image.label}: ${image.originalWidth}x${image.originalHeight}`);
+
                     const label = document.createElement('p');
                     label.textContent = image.label;
 
@@ -61,6 +66,8 @@
             });
         });
 
+        
+
         // Function to display corresponding points on the images
         function displayCorrespondingPoints(points) {
             document.querySelectorAll('.point-marker').forEach(marker => marker.remove());
@@ -71,15 +78,34 @@
                     const rect = img.getBoundingClientRect();
                     const imgContainer = img.parentElement;
 
-                    const pointMarker = document.createElement('div');
-                    pointMarker.className = 'point-marker';
-                    pointMarker.style.left = `${coords.x}px`;
-                    pointMarker.style.top = `${coords.y}px`;
+                    // Calcola i fattori di scala utilizzando le dimensioni originali
+                    const originalWidth = img.dataset.originalWidth;
+                    const originalHeight = img.dataset.originalHeight;
 
-                    imgContainer.appendChild(pointMarker);
+                    // Assicurati che le dimensioni originali siano disponibili
+                    if (originalWidth && originalHeight) {
+                        const scaleX = rect.width / originalWidth;
+                        const scaleY = rect.height / originalHeight;
+
+                        // Scala le coordinate
+                        const scaledX = coords.x * scaleX;
+                        const scaledY = coords.y * scaleY;
+
+                        // Controlla se le coordinate scalate sono all'interno dei limiti dell'immagine
+                        if (scaledX >= 0 && scaledX <= rect.width && scaledY >= 0 && scaledY <= rect.height) {
+                            const pointMarker = document.createElement('div');
+                            pointMarker.className = 'point-marker';
+                            pointMarker.style.position = 'absolute'; // Assicurati che il marker sia posizionato correttamente
+                            pointMarker.style.left = `${scaledX}px`;
+                            pointMarker.style.top = `${scaledY}px`;
+
+                            imgContainer.appendChild(pointMarker);
+                        }
+                    }
                 }
             });
         }
+
     </script>
 </body>
 </html>

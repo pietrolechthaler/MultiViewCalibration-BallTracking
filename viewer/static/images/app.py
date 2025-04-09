@@ -14,16 +14,16 @@ Service to get the list of images
 @app.route('/images')
 def images():
     image_list = [
-        {"src": "/static/images/out1.jpg", "label": "out1", "originalWidth": 3840, "originalHeight": 2160},
-        {"src": "/static/images/out2.jpg", "label": "out2", "originalWidth": 3840, "originalHeight": 2160},
-        {"src": "/static/images/out3.jpg", "label": "out3", "originalWidth": 3840, "originalHeight": 2160},
-        {"src": "/static/images/out4.jpg", "label": "out4", "originalWidth": 3840, "originalHeight": 2160},
-        {"src": "/static/images/out5.jpg", "label": "out5", "originalWidth": 3840, "originalHeight": 2160},
-        {"src": "/static/images/out7.jpg", "label": "out7", "originalWidth": 3840, "originalHeight": 2160},
-        {"src": "/static/images/out8.jpg", "label": "out8", "originalWidth": 3840, "originalHeight": 2160},
-        {"src": "/static/images/out13.jpg", "label": "out13", "originalWidth": 3840, "originalHeight": 2160},
-        {"src": "/static/images/out6.jpg", "label": "out6", "originalWidth": 3840, "originalHeight": 2160},
-        {"src": "/static/images/out12.jpg", "label": "out12", "originalWidth": 3840, "originalHeight": 2160}
+        {"src": "/static/images/out1-dist.jpg", "label": "out1", "originalWidth": 3840, "originalHeight": 2160},
+        {"src": "/static/images/out2-dist.jpg", "label": "out2", "originalWidth": 3840, "originalHeight": 2160},
+        {"src": "/static/images/out3-dist.jpg", "label": "out3", "originalWidth": 3840, "originalHeight": 2160},
+        {"src": "/static/images/out4-dist.jpg", "label": "out4", "originalWidth": 3840, "originalHeight": 2160},
+        {"src": "/static/images/out5-undist.jpg", "label": "out5", "originalWidth": 3840, "originalHeight": 2160},
+        {"src": "/static/images/out7-undist.jpg", "label": "out7", "originalWidth": 3840, "originalHeight": 2160},
+        {"src": "/static/images/out8-undist.jpg", "label": "out8", "originalWidth": 3840, "originalHeight": 2160},
+        {"src": "/static/images/out13-undist.jpg", "label": "out13", "originalWidth": 3840, "originalHeight": 2160},
+        {"src": "/static/images/out6-undist.jpg", "label": "out6", "originalWidth": 3840, "originalHeight": 2160},
+        {"src": "/static/images/out12-undist.jpg", "label": "out12", "originalWidth": 3840, "originalHeight": 2160}
     ]
     return jsonify(image_list)
 

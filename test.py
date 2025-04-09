@@ -1,57 +1,74 @@
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+import numpy as np
+import cv2
+import pickle
 
-# Percorso dell'immagine
-image_path = './annotation-images/out6.jpg'  # Sostituisci con il tuo percorso
+def calculate_homography(K_i, R_i, t_i, K_j, R_j, t_j):
+    R_rel = R_j @ R_i.T
+    t_rel = t_j - R_rel @ t_i
+    H_ij = K_j @ (R_rel - t_rel @ np.linalg.inv(K_i))
+    return H_ij
 
-# Dati delle coordinate dell'immagine
-image_coordinates = [
-    [860, 945],
-    [270, 1636],
-    [1208, 1753],
-    [2578, 1758],
-    [3515, 1673],
-    [2944, 966],
-    [2281, 946],
-    [1518, 934],
-    [610, 850],
-    [564, 886],
-    [341, 1065],
-    [836, 1046],
-    [801, 1089],
-    [564, 1366],
-    [521, 1416],
-    [25, 1372],
-    [3768, 1409],
-    [3272, 1451],
-    [3234, 1395],
-    [3006, 1111],
-    [2969, 1073],
-    [3458, 1093],
-    [3239, 914],
-    [3197, 875]
-]
+# Funzione per caricare i dati di calibrazione
+def load_calibration_data(file_path):
+    with open(file_path, 'rb') as file:
+        return pickle.load(file)
 
-# Carica l'immagine
-img = mpimg.imread(image_path)
+try:
+    # Carica i dati di calibrazione delle camere
+    data1 = load_calibration_data('./src-gen/out1F-gen/calibration_data.pkl')
+    data11 = load_calibration_data('./src-gen/out1F-gen/calibration_extrinsic.pkl')
+    data2 = load_calibration_data('./src-gen/out3F-gen/calibration_data.pkl')
+    data22 = load_calibration_data('./src-gen/out3F-gen/calibration_extrinsic.pkl')
 
-# Creazione della figura
-plt.figure(figsize=(10, 10))
+    # Estrai le matrici di calibrazione
+    K_i = data1['camera_matrix']
+    R_i = data11['rotation_matrix']
+    t_i = data11['translation_vector']
 
-# Mostra l'immagine
-plt.imshow(img)
+    K_j = data2['camera_matrix']
+    R_j = data22['rotation_matrix']
+    t_j = data22['translation_vector']
 
-# Plottare i punti
-for coord in image_coordinates:
-    plt.scatter(coord[0], coord[1], color='red')  # Cambia il colore se necessario
+    # Calcola l'omografia
+    H_ij = calculate_homography(K_i, R_i, t_i, K_j, R_j, t_j)
+    print(f"Homografia H_ij:\n{H_ij}")
 
-# Aggiungere etichette e titolo
-plt.title('Punti delle Coordinate dell\'Immagine')
-plt.xlabel('Coordinate X')
-plt.ylabel('Coordinate Y')
+    # Definisci le dimensioni del campo stilizzato
+    campo_larghezza_m = 9.0  # larghezza del campo in metri
+    campo_lunghezza_m = 18.0  # lunghezza del campo in metri
 
-# Mostrare la griglia
-plt.grid()
+    # Definisci la dimensione dell'immagine stilizzata
+    campo_larghezza_px = 800  # larghezza in pixel
+    campo_lunghezza_px = 1600  # lunghezza in pixel
 
-# Mostrare il grafico
-plt.show()
+    # Calcola la scala
+    scala = campo_larghezza_px / campo_larghezza_m  # pixel per metro
+
+    # Punto nel campo stilizzato (esempio)
+    P_campo = np.array([300, 200])  # Coordinate del punto nel campo in pixel
+
+    # Converti le coordinate del campo in metri
+    P_campo_m = np.array([P_campo[0] / scala, P_campo[1] / scala])  # Converti in metri
+
+    # Converti in coordinate omogenee
+    P_campo_homogeneo = np.array([P_campo_m[0], P_campo_m[1], 1])
+
+    # Proietta il punto nell'immagine della camera j
+    P_j = H_ij @ P_campo_homogeneo
+    P_j_norm = P_j[:2] / P_j[2]  # Normalizzazione
+
+    # Carica l'immagine della camera j
+    image_j = cv2.imread('./annotation/annotation-images/out3.jpg')
+    if image_j is None:
+        raise FileNotFoundError("L'immagine non è stata trovata nel percorso specificato.")
+
+    # Disegna il punto proiettato sull'immagine
+    cv2.circle(image_j, (int(P_j_norm[0]), int(P_j_norm[1])), radius=5, color=(0, 255, 0), thickness=-1)
+
+    # Mostra l'immagine
+    cv2.imshow('Proiezione Punto', image_j)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+except FileNotFoundError as e:
+    print(f"Errore: {e}")
