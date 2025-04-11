@@ -1,7 +1,11 @@
 # Ignore all files in the video folder
 *.mp4
+*.avi
 .DS_Store
 src-gen/
 __pycache__/
 env/
-tracking/
+tracking/datasets
+tracking/runs/detect/train2
+tracking/tndataset
+tracking/yolo11n.pt
