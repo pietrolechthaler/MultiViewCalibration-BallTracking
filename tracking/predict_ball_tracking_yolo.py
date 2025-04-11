@@ -5,9 +5,11 @@ from pathlib import Path
 import argparse
 import sys
 
+TRAIN_PATH = 'runs/detect/train4/'
+
 def detection(i):
     # Carica il modello YOLO
-    model = YOLO('runs/detect/train4/weights/best.pt')
+    model = YOLO(TRAIN_PATH +'weights/best.pt')
 
     # Percorso del video di input
     input_video_path = f"../video/match/out{i}.mp4"
@@ -23,12 +25,12 @@ def detection(i):
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
     # Percorso del video di output
-    output_video_path = f"detection/out{i}_detected.mp4"
+    output_video_path = TRAIN_PATH + f"out{i}_detected.mp4"
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec per MP4
     out = cv2.VideoWriter(output_video_path, fourcc, fps, (frame_width, frame_height))
 
     # Percorso del file JSON di output
-    output_json_path = f"detection/out{i}_coordinates.json"
+    output_json_path = TRAIN_PATH + f"out{i}_coordinates.json"
     Path(output_json_path).parent.mkdir(parents=True, exist_ok=True)
 
     # Lista per salvare i dati JSON
