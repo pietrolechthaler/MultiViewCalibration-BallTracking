@@ -44,7 +44,7 @@ def process_video(input_path, model, video_dir, coords_dir, camera_id):
         
         for frame_idx, result in enumerate(results):
             frame = result.orig_img
-            boxes = result.boxes.xyxyn.cpu().numpy()
+            boxes = result.boxes.xyxy.cpu().numpy()
             confidences = result.boxes.conf.cpu().numpy()
 
             for ball_idx, (box, confidence) in enumerate(zip(boxes, confidences)):
