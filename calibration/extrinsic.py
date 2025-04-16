@@ -113,7 +113,7 @@ def main():
 
         # Convert the rotation vector to a rotation matrix
         rotation_matrix, _ = cv2.Rodrigues(rotation_vector)
-
+    
         # Compute the camera position
         camera_position = -np.dot(rotation_matrix.T, translation_vector)
         camera_positions.append((cam_id, camera_position, rotation_matrix.T, translation_vector))
@@ -125,8 +125,8 @@ def main():
         extrinsic_data = {
             'camera_id': cam_id,
             'camera_position': camera_position,
-            'rotation_matrix': rotation_matrix,
-            'translation_vector': translation_vector
+            'rotation_matrix': rotation_matrix.T,
+            'translation_vector': translation_vector,
         }
         
         with open(os.path.join(f'./src-gen/out{cam_id}F-gen', 'calibration_extrinsic.pkl'), 'wb') as pkl_file:
