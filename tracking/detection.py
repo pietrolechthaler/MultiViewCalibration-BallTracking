@@ -7,14 +7,14 @@ import sys
 # Constants
 TRAIN_PATH = 'tracking/runs/detect/train4/'
 VIDEO_SUBDIR = 'video/'
-COORDS_SUBDIR = 'coordinates/'
+COORDS_DIR = 'tracking/coordinates/'
 START_SEC = 155
 END_SEC = 166 
 
 def setup_directories(base_path):
     """Create necessary directories if they don't exist"""
     video_dir = Path(base_path) / VIDEO_SUBDIR
-    coords_dir = Path(base_path) / COORDS_SUBDIR
+    coords_dir = COORDS_DIR
     video_dir.mkdir(parents=True, exist_ok=True)
     coords_dir.mkdir(parents=True, exist_ok=True)
     return video_dir, coords_dir

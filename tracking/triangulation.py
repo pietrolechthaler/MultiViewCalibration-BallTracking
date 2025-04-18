@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 # Folder containing training data
-TRAIN_FOLDER = './tracking/runs/detect/train4'
+TRACKING_FOLDER = './tracking'
 
 # Pairs of cameras to process (each pair will be used for triangulation)
 CAM_PAIRS = [
@@ -119,8 +119,8 @@ for cam_pair in CAM_PAIRS:
     cam_id2 = int(cam_pair[1])
 
     # Load detection data for both cameras
-    df_cam1 = pd.read_csv(os.path.join(TRAIN_FOLDER, f'coordinates/out{cam_id1}_coordinates.csv'))
-    df_cam2 = pd.read_csv(os.path.join(TRAIN_FOLDER, f'coordinates/out{cam_id2}_coordinates.csv'))
+    df_cam1 = pd.read_csv(os.path.join(TRACKING_FOLDER, f'coordinates/out{cam_id1}_coordinates.csv'))
+    df_cam2 = pd.read_csv(os.path.join(TRACKING_FOLDER, f'coordinates/out{cam_id2}_coordinates.csv'))
 
     # Clean column names (remove extra spaces)
     df_cam1.columns = df_cam1.columns.str.strip()
@@ -166,21 +166,21 @@ for cam_pair in CAM_PAIRS:
     })
 
     # Save per-camera-pair results
-    coords_3d_df.to_csv(os.path.join(TRAIN_FOLDER, f'coordinates/out{cam_id1}_{cam_id2}_coordinates.csv'), index=False)
+    coords_3d_df.to_csv(os.path.join(TRACKING_FOLDER, f'coordinates/out{cam_id1}_{cam_id2}_coordinates.csv'), index=False)
 
     # Append to combined results file
     if cam_id1 == 3 and cam_id2 == 1:  # First pair - create new file
-        coords_3d_df_all.to_csv(os.path.join(TRAIN_FOLDER, f'coordinates/coords_3d_all.csv'), index=False)
+        coords_3d_df_all.to_csv(os.path.join(TRACKING_FOLDER, f'coordinates/coords_3d_all.csv'), index=False)
     else:  # Subsequent pairs - append to existing file
-        coords_3d_df_all.to_csv(os.path.join(TRAIN_FOLDER, f'coordinates/coords_3d_all.csv'), mode='a', header=False, index=False)
+        coords_3d_df_all.to_csv(os.path.join(TRACKING_FOLDER, f'coordinates/coords_3d_all.csv'), mode='a', header=False, index=False)
 
     # Plot for this camera pair
     #plot_court(coords_3d_df, cam_id1, cam_id2)
 
 # Sort the final combined CSV file by timestamp
-df = pd.read_csv(os.path.join(TRAIN_FOLDER, f'coordinates/coords_3d_all.csv'))
+df = pd.read_csv(os.path.join(TRACKING_FOLDER, f'coordinates/coords_3d_all.csv'))
 df = df.sort_values(by='timestamp_sec')
-df.to_csv(os.path.join(TRAIN_FOLDER, f'coordinates/coords_3d_all.csv'), index=False)
+df.to_csv(os.path.join(TRACKING_FOLDER, f'coordinates/coords_3d_all.csv'), index=False)
 
 # Extract 3D coordinates for final visualization
 coords_3d = df[['X', 'Y', 'Z']]
@@ -212,4 +212,4 @@ plt.tight_layout()
 plt.show()
 
 # Save the final plot as an image
-fig.savefig(os.path.join(TRAIN_FOLDER, 'coordinates/3D_ball_detections.png'), dpi=300)
+fig.savefig(os.path.join(TRACKING_FOLDER, 'coordinates/3D_ball_detections.png'), dpi=300)

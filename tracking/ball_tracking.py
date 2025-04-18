@@ -49,7 +49,7 @@ def draw_volleyball_court(ax):
 def main():
     # Load the data
     try:
-        data = pd.read_csv("tracking/runs/detect/train4/coordinates/coords_3d_all.csv")
+        data = pd.read_csv("tracking/coordinates/coords_3d_all.csv")
     except FileNotFoundError:
         print("Error: Input CSV file not found!")
         return
@@ -113,7 +113,7 @@ def main():
     
     # Save to CSV
     try:
-        estimated_state_df.to_csv("tracking/runs/detect/train4/coordinates/estimated_states.csv", index=False)
+        estimated_state_df.to_csv("tracking/coordinates/estimated_states.csv", index=False)
         print("Estimated states saved to estimated_states.csv")
     except Exception as e:
         print(f"Error saving results: {str(e)}")
