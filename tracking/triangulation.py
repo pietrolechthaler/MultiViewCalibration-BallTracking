@@ -6,28 +6,9 @@ import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-# Folder containing training data
-TRACKING_FOLDER = './tracking'
+from parameters import TRACKING_FOLDER, CAM_PAIRS, COURT_LENGTH, COURT_WIDTH, NET_HEIGHT, NET_WIDTH, START_SEC, END_SEC
 
-# Pairs of cameras to process (each pair will be used for triangulation)
-CAM_PAIRS = [
-        ["3", "1"],
-        ["1", "2"],
-        ["2", "4"],
-        ["4", "12"],
-        ["12", "7"],
-        ["7", "8"],
-        ["8", "6"],
-        ["6", "5"],
-        ["5", "13"],
-        ["13", "3"]
-    ]
 
-# Court dimensions constants (in meters)
-COURT_LENGTH = 18.0  # Standard volleyball court length
-COURT_WIDTH = 9.0    # Standard volleyball court width
-NET_HEIGHT = 2.24    # Height of the net at center
-NET_WIDTH = 1.0      # Width of the net poles
 
 def draw_volleyball_court(ax):
     """Draw a 3D volleyball court on the given matplotlib axis"""
@@ -179,6 +160,8 @@ for cam_pair in CAM_PAIRS:
 
 # Sort the final combined CSV file by timestamp
 df = pd.read_csv(os.path.join(TRACKING_FOLDER, f'coordinates/coords_3d_all.csv'))
+# Remove rows with TIMESTAMP_SEC < START_SEC or > END_SEC
+df = df[(df['timestamp_sec'] >= START_SEC) & (df['timestamp_sec'] <= END_SEC)]
 df = df.sort_values(by='timestamp_sec')
 df.to_csv(os.path.join(TRACKING_FOLDER, f'coordinates/coords_3d_all.csv'), index=False)
 

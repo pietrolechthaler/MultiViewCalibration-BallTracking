@@ -1,150 +1,259 @@
 import numpy as np
 import pandas as pd
-from particle_filter import PersonalizedParticleFilter
+from particle_filter import ParticleFilter  # Removed PersonalizedParticleFilter since it's not used
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from scipy.signal import savgol_filter, butter, filtfilt
+from scipy.interpolate import interp1d
 
-# Court dimensions constants (in meters)
-COURT_LENGTH = 18.0  # Standard volleyball court length
-COURT_WIDTH = 9.0    # Standard volleyball court width
-NET_HEIGHT = 2.43     # Official net height for men's volleyball
-NET_WIDTH = 1.0       # Width of the net poles
+from parameters import COURT_LENGTH, COURT_WIDTH, NET_HEIGHT, NET_WIDTH
+
+TRACKING_DIR = "tracking/"  # for ./tracking.sh
+#TRACKING_DIR = "./"
+outlier_threshold = 4.0  # Threshold for outlier detection in meters
+
+
+def lowpass_filter(data, cutoff=2.0, fs=100.0, order=5):
+    """
+    Apply lowpass filter to the data
+    Args:
+        data: DataFrame with columns ['X_est', 'Y_est', 'Z_est']
+        cutoff: cutoff frequency in Hz
+        fs: sampling frequency in Hz
+        order: order of the filter
+    Returns:
+        DataFrame with filtered values
+    """
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    
+    filtered_data = data.copy()
+    for col in ['X_est', 'Y_est', 'Z_est']:
+        filtered_data[col] = filtfilt(b, a, data[col])
+    
+    return filtered_data
+
+def smooth_trajectory(estimated_df, window_length=15, polyorder=3, resample_freq='0.01S'):
+    """
+    Apply smoothing to the estimated trajectory and resample at uniform frequency
+    
+    Args:
+        estimated_df: DataFrame with columns ['timestamp', 'X_est', 'Y_est', 'Z_est']
+        window_length: window length for Savitzky-Golay (must be odd)
+        polyorder: polynomial order for Savitzky-Golay
+        resample_freq: resampling frequency (e.g., '0.01S' for 100Hz)
+    
+    Returns:
+        DataFrame with columns ['timestamp', 'X_smooth', 'Y_smooth', 'Z_smooth']
+    """
+    # Convert timestamp to datetime and set as index
+    df = estimated_df.copy()
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s')
+    df.set_index('timestamp', inplace=True)
+    
+    # Create continuous time series with uniform frequency
+    start_time = df.index.min()
+    end_time = df.index.max()
+    new_index = pd.date_range(start=start_time, end=end_time, freq=resample_freq)
+    
+    # Interpolate data onto the new timeline
+    interp_func_x = interp1d(df.index.astype(np.int64), df['X_est'], kind='linear', fill_value='extrapolate')
+    interp_func_y = interp1d(df.index.astype(np.int64), df['Y_est'], kind='linear', fill_value='extrapolate')
+    interp_func_z = interp1d(df.index.astype(np.int64), df['Z_est'], kind='linear', fill_value='extrapolate')
+    
+    x_interp = interp_func_x(new_index.astype(np.int64))
+    y_interp = interp_func_y(new_index.astype(np.int64))
+    z_interp = interp_func_z(new_index.astype(np.int64))
+    
+    # Apply Savitzky-Golay filter
+    x_smooth = savgol_filter(x_interp, window_length=window_length, polyorder=polyorder)
+    y_smooth = savgol_filter(y_interp, window_length=window_length, polyorder=polyorder)
+    z_smooth = savgol_filter(z_interp, window_length=window_length, polyorder=polyorder)
+    
+    # Create result DataFrame
+    smooth_df = pd.DataFrame({
+        'timestamp': new_index,
+        'X_smooth': x_smooth,
+        'Y_smooth': y_smooth,
+        'Z_smooth': z_smooth
+    })
+    
+    # Convert timestamp back to seconds
+    smooth_df['timestamp'] = (smooth_df['timestamp'] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1s')
+    
+    return smooth_df
 
 def draw_volleyball_court(ax):
     """Draw a 3D volleyball court on the given matplotlib axis"""
     hl = COURT_LENGTH / 2  # half length
     hw = COURT_WIDTH / 2   # half width
 
-    # Court boundary (white lines)
+    # Court boundary 
     court_lines = [
         [(-hl, -hw, 0), (hl, -hw, 0)],  # Back line
         [(-hl, hw, 0), (hl, hw, 0)],    # Front line
         [(-hl, -hw, 0), (-hl, hw, 0)],  # Left sideline
-        [(hl, -hw, 0), (hl, hw, 0)]    # Right sideline
+        [(hl, -hw, 0), (hl, hw, 0)]     # Right sideline
     ]
     
     for line in court_lines:
-        ax.plot(*zip(*line), color='white', linewidth=1)
+        ax.plot(*zip(*line), color='blue', linewidth=1)
 
-    # Center line (dashed white)
-    ax.plot([-hl, hl], [0, 0], [0, 0], 'white', linestyle='--', linewidth=1)
+    # Center line
+    ax.plot([-hl, hl], [0, 0], [0, 0], 'blue', linestyle='--', linewidth=1)
 
     # Attack lines (3 meters from center)
     attack_line = 3.0  
-    ax.plot([attack_line, attack_line], [-hw, hw], [0, 0], 'white', linewidth=1)
-    ax.plot([-attack_line, -attack_line], [-hw, hw], [0, 0], 'white', linewidth=1)
+    ax.plot([attack_line, attack_line], [-hw, hw], [0, 0], 'blue', linewidth=1)
+    ax.plot([-attack_line, -attack_line], [-hw, hw], [0, 0], 'blue', linewidth=1)
 
-    # Net (red)
+    # Net
     ax.plot([-NET_WIDTH/2, NET_WIDTH/2], [0, 0], [NET_HEIGHT, NET_HEIGHT], 
-            'red', linewidth=2)
+            'blue', linewidth=2)
     
     # Net poles
-    ax.plot([0, 0], [-hw, -hw], [0, NET_HEIGHT], 'red', linewidth=2)
-    ax.plot([0, 0], [hw, hw], [0, NET_HEIGHT], 'red', linewidth=2)
-
-    # Set court appearance
-    ax.set_facecolor('darkgreen')
-    ax.grid(False)
+    ax.plot([0, 0], [-hw, -hw], [0, NET_HEIGHT], 'blue', linewidth=2)
+    ax.plot([0, 0], [hw, hw], [0, NET_HEIGHT], 'blue', linewidth=2)
 
 def main():
     # Load the data
     try:
-        data = pd.read_csv("tracking/coordinates/coords_3d_all.csv")
+        data = pd.read_csv(TRACKING_DIR + "coordinates/coords_3d_all.csv")
     except FileNotFoundError:
         print("Error: Input CSV file not found!")
         return
     
-    # Initialize results list
-    results = []
+    # Preprocess: filter invalid points and sort by timestamp
     
-    # Get first valid detection
-    first_valid_idx = data['X'].first_valid_index()
-    if first_valid_idx is None:
-        print("Error: No valid detections found in the data!")
+    valid_detections = data[['timestamp_sec', 'X', 'Y', 'Z']].dropna()
+    valid_detections = valid_detections.sort_values('timestamp_sec')
+    
+    # Initialize PF with first valid detection
+    if len(valid_detections) == 0:
+        print("Error: No valid detections found!")
         return
         
-    initial_detection = data.iloc[first_valid_idx][['X', 'Y', 'Z']].values
+    first_detection = valid_detections.iloc[0]
+    #print(f"First detection: {first_detection}")
+    initial_state = first_detection[['X', 'Y', 'Z']].values
+    #print(f"Initial state: {initial_state}")
     
-    # Initialize particle filter
-    pf = PersonalizedParticleFilter(
-        initial_state=initial_detection,
-        num_particles=2000,
-        process_noise_std=[0.2, 0.1],
-        measurement_noise_std=0.3,
-        gravity=-9.81
+    pf = ParticleFilter(
+        initial_state=initial_state,
+        num_particles=1000,
+        process_noise_std=0.5,
+        measurement_noise_std=1.0,
+        initial_state_std=1.0
     )
+    pf.last_timestamp = first_detection['timestamp_sec']
     
-    previous_time = data.iloc[first_valid_idx]["timestamp_sec"]
+    results = []
     
-    # Process each detection
-    for i in range(first_valid_idx + 1, len(data)):
-        try:
-            current_time = data.iloc[i]["timestamp_sec"]
-            dt = max(0.001, current_time - previous_time)  # Prevent dt=0
-            previous_time = current_time
-
-            # Prediction step
-            pf.predict(dt=dt)
+    # Add first detection and estimate (they will be the same)
+    results.append({
+        'timestamp': first_detection['timestamp_sec'],
+        'X_det': first_detection['X'],
+        'Y_det': first_detection['Y'],
+        'Z_det': first_detection['Z'],
+        'X_est': initial_state[0],
+        'Y_est': initial_state[1],
+        'Z_est': initial_state[2]
+    })
+    
+    # Process remaining detections
+    for _, row in valid_detections.iloc[1:].iterrows():
+        timestamp = row['timestamp_sec']
+        detection = row[['X', 'Y', 'Z']].values
+        
+        # Calculate dt from last timestamp
+        dt = timestamp - pf.last_timestamp
+        pf.last_timestamp = timestamp
+        
+        # Predict next state
+        pf.predict(dt)
+        
+        # Outlier check based on last estimate
+        if results:  # If we already have at least one estimate
+            last_estimate = np.array([results[-1]['X_est'], results[-1]['Y_est'], results[-1]['Z_est']])
+            distance = np.linalg.norm(detection - last_estimate)
             
-            # Update step
-            detection = data.iloc[i][['X', 'Y', 'Z']].values if not np.isnan(data.iloc[i]["X"]) else None
-            pf.update_weights(detection)
-            pf.resample()
-
-            # Get estimation
-            estimated_state = pf.estimate()
-            
-            # Store results
-            results.append({
-                'timestamp_sec': current_time,
-                'X_est': estimated_state[0],
-                'Y_est': estimated_state[1],
-                'Z_est': estimated_state[2],
-                'X_det': data.iloc[i]["X"],
-                'Y_det': data.iloc[i]["Y"],
-                'Z_det': data.iloc[i]["Z"]
-            })
-        except Exception as e:
-            print(f"Error processing frame {i}: {str(e)}")
-            continue
-
-    # Convert results to DataFrame
+            if distance > outlier_threshold:
+                # If it's an outlier, use only prediction
+                estimated_state = pf.estimate()
+                results.append({
+                    'timestamp': timestamp,
+                    'X_det': None,
+                    'Y_det': None,
+                    'Z_det': None,
+                    'X_est': estimated_state[0],
+                    'Y_est': estimated_state[1],
+                    'Z_est': estimated_state[2]
+                })
+                continue
+        
+        # Update filter with detection
+        weights = pf.update_weights(detection)
+        pf.resample(weights)
+        estimated_state = pf.estimate()
+        
+        results.append({
+            'timestamp': timestamp,
+            'X_det': detection[0],
+            'Y_det': detection[1],
+            'Z_det': detection[2],
+            'X_est': estimated_state[0],
+            'Y_est': estimated_state[1],
+            'Z_est': estimated_state[2]
+        })    
+    
+    # Convert to DataFrame
     estimated_state_df = pd.DataFrame(results)
     
-    # Save to CSV
-    try:
-        estimated_state_df.to_csv("tracking/coordinates/estimated_states.csv", index=False)
-        print("Estimated states saved to estimated_states.csv")
-    except Exception as e:
-        print(f"Error saving results: {str(e)}")
-
-    # Plotting
+    # Apply smoothing
+    estimates_lpf = lowpass_filter(estimated_state_df)
+    smooth_traj_df = smooth_trajectory(estimates_lpf)
+    
+    # Merge with original estimates
+    final_df = pd.merge(estimated_state_df, smooth_traj_df, on='timestamp', how='left')
+    
+    # Visualization - add smooth trajectory
     fig = plt.figure(figsize=(14, 10)) 
     ax = fig.add_subplot(111, projection='3d')
-    
-    # Draw court
     draw_volleyball_court(ax)
     
     # Plot detections and estimates
-    ax.scatter(estimated_state_df['X_det'], estimated_state_df['Y_det'], estimated_state_df['Z_det'], 
-               c='blue', label='Detected Coordinates', alpha=0.6, s=20)
-    ax.plot(estimated_state_df['X_est'], estimated_state_df['Y_est'], estimated_state_df['Z_est'], 
-            c='red', label='Estimated Trajectory', linewidth=2)
+    valid_detections = final_df.dropna(subset=['X_det'])
+    ax.scatter(valid_detections['X_det'], valid_detections['Y_det'], valid_detections['Z_det'], 
+               c='red', label='Detected Positions', alpha=0.6, s=20)
+    ax.plot(final_df['X_est'], final_df['Y_est'], final_df['Z_est'], 
+            c='green', label='Estimated Trajectory', linewidth=2, alpha=0.5)
+    ax.plot(final_df['X_smooth'], final_df['Y_smooth'], final_df['Z_smooth'], 
+            c='yellow', label='Smoothed Trajectory', linewidth=3)
     
     # Set labels and title
-    ax.set_xlabel('X-axis (Court Length)', fontsize=12)
-    ax.set_ylabel('Y-axis (Court Width)', fontsize=12)
-    ax.set_zlabel('Z-axis (Height)', fontsize=12)
+    ax.set_xlabel('Court Length (X)', fontsize=12)
+    ax.set_ylabel('Court Width (Y)', fontsize=12)
+    ax.set_zlabel('Height (Z)', fontsize=12)
     ax.set_title('3D Volleyball Tracking with Particle Filter', fontsize=14)
     
+    # Set court dimensions
     ax.set_xlim(-COURT_LENGTH/2, COURT_LENGTH/2)
     ax.set_ylim(-COURT_WIDTH/2, COURT_WIDTH/2)
     ax.set_zlim(0, 5)  # Up to 5 meters height
     
-    # Add legend and adjust layout
+    # Add legend and adjust view
     ax.legend(fontsize=12, loc='upper right')
+    ax.view_init(elev=30, azim=-45)  # Good viewing angle
     plt.tight_layout()
     plt.show()
+    
+    # Save results
+    estimated_state_df.to_csv(TRACKING_DIR + 'estimated_trajectory.csv', index=False)
+    final_df.to_csv(TRACKING_DIR + 'final_trajectory.csv', index=False)
+
+    # Save plot
+    fig.savefig(TRACKING_DIR + 'trajectory_plot.png', dpi=300, bbox_inches='tight')
 
 if __name__ == "__main__":
     main()
