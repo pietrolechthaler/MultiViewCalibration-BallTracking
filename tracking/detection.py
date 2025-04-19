@@ -4,12 +4,7 @@ from pathlib import Path
 import argparse
 import sys
 
-# Constants
-TRAIN_PATH = 'tracking/runs/detect/train4/'
-VIDEO_SUBDIR = 'video/'
-COORDS_DIR = Path('tracking/coordinates/')
-START_SEC = 155
-END_SEC = 166
+from parameters import TRAIN_PATH, VIDEO_SUBDIR, COORDS_DIR, START_SEC, END_SEC
 
 
 def setup_directories(base_path):
@@ -135,7 +130,7 @@ def process_video(input_path, model, video_dir, coords_dir, camera_id, start_sec
                     cv2.putText(frame, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 2)
             else:
                 roi_frame = frame[y_roi:y_roi+h_roi, x_roi:x_roi+w_roi]
-                results = model.predict(source=roi_frame, conf=0.30)
+                results = model.predict(source=roi_frame)
                 result = results[0]
 
                 if len(result.boxes) > 0:
