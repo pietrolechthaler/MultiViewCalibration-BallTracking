@@ -4,8 +4,7 @@ from pathlib import Path
 import argparse
 import sys
 
-from utils.parameters import TRAIN_PATH, VIDEO_SUBDIR, COORDS_DIR, START_SEC, END_SEC
-
+from utils.parameters import TRAIN_PATH, VIDEO_SUBDIR, COORDS_DIR, START_SEC, END_SEC, WEIGHTS
 
 def setup_directories(base_path):
     video_dir = Path(base_path) / VIDEO_SUBDIR
@@ -25,7 +24,7 @@ def select_roi(frame, max_size=1000):
     else:
         resized_frame = frame
 
-    print("Select ROI and press ENTER or SPACE when done, or press close to cancel.")
+    print("Select ROI and press ENTER or SPACE when done, or press 'c' to cancel.")
     roi = cv2.selectROI("Select ROI", resized_frame, fromCenter=False, showCrosshair=True)
     cv2.destroyWindow("Select ROI")
 
@@ -130,7 +129,7 @@ def process_video(input_path, model, video_dir, coords_dir, camera_id, start_sec
                     cv2.putText(frame, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 2)
             else:
                 roi_frame = frame[y_roi:y_roi+h_roi, x_roi:x_roi+w_roi]
-                results = model.predict(source=roi_frame)
+                results = model.predict(source=roi_frame, conf=0.30)
                 result = results[0]
 
                 if len(result.boxes) > 0:
@@ -166,7 +165,7 @@ def main(camera_id, start_sec, end_sec):
     try:
         video_dir, coords_dir = setup_directories(TRAIN_PATH)
 
-        model_path = Path(TRAIN_PATH) / 'weights/best_v11_800.pt'
+        model_path = Path(TRAIN_PATH) / WEIGHTS
         model = YOLO(str(model_path))
 
         input_path = f"video/match/out{camera_id}.mp4"

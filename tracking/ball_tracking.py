@@ -224,11 +224,11 @@ def main():
     # Plot detections and estimates
     valid_detections = final_df.dropna(subset=['X_det'])
     ax.scatter(valid_detections['X_det'], valid_detections['Y_det'], valid_detections['Z_det'], 
-               c='red', label='Detected Positions', alpha=0.6, s=20)
+               c='yellow', label='Detected Positions', alpha=0.6, s=20)
     ax.plot(final_df['X_est'], final_df['Y_est'], final_df['Z_est'], 
-            c='green', label='Estimated Trajectory', linewidth=2, alpha=0.5)
+            c='orange', label='Estimated Trajectory', linewidth=2, alpha=0.5)
     ax.plot(final_df['X_smooth'], final_df['Y_smooth'], final_df['Z_smooth'], 
-            c='yellow', label='Smoothed Trajectory', linewidth=3)
+            c='red', label='Smoothed Trajectory', linewidth=3)
     
     # Set labels and title
     ax.set_xlabel('Court Length (X)', fontsize=12)

@@ -1,12 +1,15 @@
 import numpy as np
+from pathlib import Path
 TRAIN_PATH = 'tracking/runs/detect/train4/'
 VIDEO_SUBDIR = 'video/'
-COORDS_DIR = 'tracking/coordinates/'
+COORDS_DIR = Path('tracking/coordinates/')
 START_SEC = 155
 END_SEC = 166
 
 # Folder containing training data
 TRACKING_FOLDER = './tracking'
+
+WEIGHTS = 'weights/best_v11_800.pt'
 
 RESULTS_DIR = 'tracking/results/'
 
