@@ -1,19 +1,18 @@
 import numpy as np
 import pandas as pd
-from particle_filter import ParticleFilter  # Removed PersonalizedParticleFilter since it's not used
+from utils.particle_filter import ParticleFilter
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.signal import savgol_filter, butter, filtfilt
 from scipy.interpolate import interp1d
 
-from parameters import COURT_LENGTH, COURT_WIDTH, NET_HEIGHT, NET_WIDTH
+from utils.parameters import COURT_LENGTH, COURT_WIDTH, NET_HEIGHT, NET_WIDTH, RESULTS_DIR
 
-TRACKING_DIR = "tracking/"  # for ./tracking.sh
-#TRACKING_DIR = "./"
+TRACKING_DIR = "tracking/"
 outlier_threshold = 4.0  # Threshold for outlier detection in meters
 
 
-def lowpass_filter(data, cutoff=2.0, fs=100.0, order=5):
+def lowpass_filter(data, cutoff=2.0, fs=100.0, order=2):
     """
     Apply lowpass filter to the data
     Args:
@@ -119,7 +118,7 @@ def draw_volleyball_court(ax):
 def main():
     # Load the data
     try:
-        data = pd.read_csv(TRACKING_DIR + "coordinates/coords_3d_all.csv")
+        data = pd.read_csv(RESULTS_DIR + "coords_3d_all.csv")
     except FileNotFoundError:
         print("Error: Input CSV file not found!")
         return
@@ -217,7 +216,7 @@ def main():
     # Merge with original estimates
     final_df = pd.merge(estimated_state_df, smooth_traj_df, on='timestamp', how='left')
     
-    # Visualization - add smooth trajectory
+    # Visualization
     fig = plt.figure(figsize=(14, 10)) 
     ax = fig.add_subplot(111, projection='3d')
     draw_volleyball_court(ax)
@@ -243,17 +242,16 @@ def main():
     ax.set_zlim(0, 5)  # Up to 5 meters height
     
     # Add legend and adjust view
-    ax.legend(fontsize=12, loc='upper right')
-    ax.view_init(elev=30, azim=-45)  # Good viewing angle
+    ax.legend(fontsize=12, loc='upper left')
     plt.tight_layout()
     plt.show()
     
     # Save results
-    estimated_state_df.to_csv(TRACKING_DIR + 'estimated_trajectory.csv', index=False)
-    final_df.to_csv(TRACKING_DIR + 'final_trajectory.csv', index=False)
+    estimated_state_df.to_csv(RESULTS_DIR + 'estimated_trajectory.csv', index=False)
+    final_df.to_csv(RESULTS_DIR + 'smoothed_trajectory.csv', index=False)
 
     # Save plot
-    fig.savefig(TRACKING_DIR + 'trajectory_plot.png', dpi=300, bbox_inches='tight')
+    fig.savefig(RESULTS_DIR + 'trajectory_plot.png', dpi=300, bbox_inches='tight')
 
 if __name__ == "__main__":
     main()

@@ -6,7 +6,7 @@ import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from parameters import TRACKING_FOLDER, CAM_PAIRS, COURT_LENGTH, COURT_WIDTH, NET_HEIGHT, NET_WIDTH, START_SEC, END_SEC
+from utils.parameters import TRACKING_FOLDER, CAM_PAIRS, COURT_LENGTH, COURT_WIDTH, NET_HEIGHT, NET_WIDTH, START_SEC, END_SEC, RESULTS_DIR
 
 
 
@@ -151,19 +151,19 @@ for cam_pair in CAM_PAIRS:
 
     # Append to combined results file
     if cam_id1 == 3 and cam_id2 == 1:  # First pair - create new file
-        coords_3d_df_all.to_csv(os.path.join(TRACKING_FOLDER, f'coordinates/coords_3d_all.csv'), index=False)
+        coords_3d_df_all.to_csv(os.path.join(RESULTS_DIR, f'coords_3d_all.csv'), index=False)
     else:  # Subsequent pairs - append to existing file
-        coords_3d_df_all.to_csv(os.path.join(TRACKING_FOLDER, f'coordinates/coords_3d_all.csv'), mode='a', header=False, index=False)
+        coords_3d_df_all.to_csv(os.path.join(RESULTS_DIR, f'coords_3d_all.csv'), mode='a', header=False, index=False)
 
     # Plot for this camera pair
     #plot_court(coords_3d_df, cam_id1, cam_id2)
 
 # Sort the final combined CSV file by timestamp
-df = pd.read_csv(os.path.join(TRACKING_FOLDER, f'coordinates/coords_3d_all.csv'))
+df = pd.read_csv(os.path.join(RESULTS_DIR, f'coords_3d_all.csv'))
 # Remove rows with TIMESTAMP_SEC < START_SEC or > END_SEC
 df = df[(df['timestamp_sec'] >= START_SEC) & (df['timestamp_sec'] <= END_SEC)]
 df = df.sort_values(by='timestamp_sec')
-df.to_csv(os.path.join(TRACKING_FOLDER, f'coordinates/coords_3d_all.csv'), index=False)
+df.to_csv(os.path.join(RESULTS_DIR, f'coords_3d_all.csv'), index=False)
 
 # Extract 3D coordinates for final visualization
 coords_3d = df[['X', 'Y', 'Z']]
@@ -195,4 +195,4 @@ plt.tight_layout()
 plt.show()
 
 # Save the final plot as an image
-fig.savefig(os.path.join(TRACKING_FOLDER, 'coordinates/3D_ball_detections.png'), dpi=300)
+fig.savefig(os.path.join(RESULTS_DIR, '3D_ball_detections.png'), dpi=300)

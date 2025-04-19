@@ -4,7 +4,7 @@ from pathlib import Path
 import argparse
 import sys
 
-from parameters import TRAIN_PATH, VIDEO_SUBDIR, COORDS_DIR, START_SEC, END_SEC
+from utils.parameters import TRAIN_PATH, VIDEO_SUBDIR, COORDS_DIR, START_SEC, END_SEC
 
 
 def setup_directories(base_path):
@@ -25,7 +25,7 @@ def select_roi(frame, max_size=1000):
     else:
         resized_frame = frame
 
-    print("Select ROI and press ENTER or SPACE when done, or press 'c' to cancel.")
+    print("Select ROI and press ENTER or SPACE when done, or press close to cancel.")
     roi = cv2.selectROI("Select ROI", resized_frame, fromCenter=False, showCrosshair=True)
     cv2.destroyWindow("Select ROI")
 

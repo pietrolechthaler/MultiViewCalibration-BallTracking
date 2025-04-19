@@ -8,6 +8,8 @@ END_SEC = 166
 # Folder containing training data
 TRACKING_FOLDER = './tracking'
 
+RESULTS_DIR = 'tracking/results/'
+
 # Pairs of cameras to process (each pair will be used for triangulation)
 CAM_PAIRS = [
         ["3", "1"],

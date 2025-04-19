@@ -19,10 +19,10 @@ run_script() {
     fi
 }
 
-# Run scripts sequentially with error checking
+# Run scripts sequentially
 run_script "tracking/triangulation.py" || exit 1
 run_script "tracking/ball_tracking.py" || exit 1
 
 echo "----------------------------"
-echo "All tracking tasks completed successfully"
+echo "Tracking pipeline completed."
 exit 0
