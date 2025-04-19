@@ -9,7 +9,7 @@ END_SEC = 166
 # Folder containing training data
 TRACKING_FOLDER = './tracking'
 
-WEIGHTS = 'weights/best_v11_800.pt'
+WEIGHTS = 'weights/best.pt'
 
 RESULTS_DIR = 'tracking/results/'
 

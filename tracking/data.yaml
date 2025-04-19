@@ -3,17 +3,3 @@ val: images/val
 test: images/test
 nc: 1
 names: ['volleyball']
-
-augment: True
-augmentation:
-  hsv_h: 0.015  # Hue
-  hsv_s: 0.7    # Saturation 
-  hsv_v: 0.4    # Value
-  degrees: 10   # Rotazione
-  translate: 0.1  # Traslazione
-  scale: 0.5    # Scalatura
-  shear: 0.0    # Shear
-  flipud: 0.0   # Flip verticale
-  fliplr: 0.5   # Flip orizzontale (50% prob)
-  mosaic: 1.0   # Mosaic (miscela di 4 immagini)
-  mixup: 0.0    # Mixup (fusione di 2 immagini)
