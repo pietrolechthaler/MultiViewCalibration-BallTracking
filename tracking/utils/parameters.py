@@ -1,6 +1,8 @@
 import numpy as np
 from pathlib import Path
-TRAIN_PATH = 'tracking/runs/detect/train4/'
+
+
+TRAIN_PATH = 'tracking/runs/detect/train6/'
 VIDEO_SUBDIR = 'video/'
 COORDS_DIR = Path('tracking/coordinates/')
 START_SEC = 155

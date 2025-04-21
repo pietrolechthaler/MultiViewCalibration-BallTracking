@@ -12,76 +12,59 @@ TRACKING_DIR = "tracking/"
 outlier_threshold = 4.0  # Threshold for outlier detection in meters
 
 
-def lowpass_filter(data, cutoff=2.0, fs=100.0, order=2):
+from scipy.signal import butter, filtfilt
+import pandas as pd
+import numpy as np
+
+def lowpass_filter(data, cutoff=5.0, fs=100.0, order=2, padlen=150):
     """
-    Apply lowpass filter to the data
+    Apply a zero-phase lowpass Butterworth filter to the data for smoother results.
+    
     Args:
         data: DataFrame with columns ['X_est', 'Y_est', 'Z_est']
-        cutoff: cutoff frequency in Hz
-        fs: sampling frequency in Hz
-        order: order of the filter
+        cutoff: cutoff frequency in Hz (default: 2.0)
+        fs: sampling frequency in Hz (default: 100.0)
+        order: order of the filter (default: 4, higher for steeper rolloff)
+        padlen: padding length for filtfilt (default: 150, higher for smoother edges)
+    
     Returns:
-        DataFrame with filtered values
+        DataFrame with filtered values (same columns as input)
+    
+    Note:
+        - Uses forward-backward filtering (filtfilt) for zero phase delay
+        - Higher order gives steeper rolloff but may introduce artifacts
+        - Larger padlen reduces edge effects but increases computation
     """
+    # Validate input
+    if not isinstance(data, pd.DataFrame):
+        raise ValueError("Input must be a pandas DataFrame")
+    
+    required_cols = ['X_est', 'Y_est', 'Z_est']
+    if not all(col in data.columns for col in required_cols):
+        raise ValueError(f"DataFrame must contain columns {required_cols}")
+    
+    if len(data) < order * 3:
+        raise ValueError(f"Need at least {order * 3} samples for order {order} filter")
+    
+    # Design Butterworth filter
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
     
+    # Apply filter to each coordinate
     filtered_data = data.copy()
-    for col in ['X_est', 'Y_est', 'Z_est']:
-        filtered_data[col] = filtfilt(b, a, data[col])
+    for col in required_cols:
+        # Handle NaN values by interpolation before filtering
+        clean_series = data[col].interpolate().ffill().bfill()
+        
+        # Apply zero-phase filtering
+        filtered_data[col] = filtfilt(
+            b, a, 
+            clean_series,
+            padlen=min(padlen, len(data) - 1)  # Ensure padlen isn't too large
+        )
     
     return filtered_data
-
-def smooth_trajectory(estimated_df, window_length=15, polyorder=3, resample_freq='0.01S'):
-    """
-    Apply smoothing to the estimated trajectory and resample at uniform frequency
-    
-    Args:
-        estimated_df: DataFrame with columns ['timestamp', 'X_est', 'Y_est', 'Z_est']
-        window_length: window length for Savitzky-Golay (must be odd)
-        polyorder: polynomial order for Savitzky-Golay
-        resample_freq: resampling frequency (e.g., '0.01S' for 100Hz)
-    
-    Returns:
-        DataFrame with columns ['timestamp', 'X_smooth', 'Y_smooth', 'Z_smooth']
-    """
-    # Convert timestamp to datetime and set as index
-    df = estimated_df.copy()
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s')
-    df.set_index('timestamp', inplace=True)
-    
-    # Create continuous time series with uniform frequency
-    start_time = df.index.min()
-    end_time = df.index.max()
-    new_index = pd.date_range(start=start_time, end=end_time, freq=resample_freq)
-    
-    # Interpolate data onto the new timeline
-    interp_func_x = interp1d(df.index.astype(np.int64), df['X_est'], kind='linear', fill_value='extrapolate')
-    interp_func_y = interp1d(df.index.astype(np.int64), df['Y_est'], kind='linear', fill_value='extrapolate')
-    interp_func_z = interp1d(df.index.astype(np.int64), df['Z_est'], kind='linear', fill_value='extrapolate')
-    
-    x_interp = interp_func_x(new_index.astype(np.int64))
-    y_interp = interp_func_y(new_index.astype(np.int64))
-    z_interp = interp_func_z(new_index.astype(np.int64))
-    
-    # Apply Savitzky-Golay filter
-    x_smooth = savgol_filter(x_interp, window_length=window_length, polyorder=polyorder)
-    y_smooth = savgol_filter(y_interp, window_length=window_length, polyorder=polyorder)
-    z_smooth = savgol_filter(z_interp, window_length=window_length, polyorder=polyorder)
-    
-    # Create result DataFrame
-    smooth_df = pd.DataFrame({
-        'timestamp': new_index,
-        'X_smooth': x_smooth,
-        'Y_smooth': y_smooth,
-        'Z_smooth': z_smooth
-    })
-    
-    # Convert timestamp back to seconds
-    smooth_df['timestamp'] = (smooth_df['timestamp'] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1s')
-    
-    return smooth_df
 
 def draw_volleyball_court(ax):
     """Draw a 3D volleyball court on the given matplotlib axis"""
@@ -211,10 +194,19 @@ def main():
     
     # Apply smoothing
     estimates_lpf = lowpass_filter(estimated_state_df)
-    smooth_traj_df = smooth_trajectory(estimates_lpf)
+    estimates_lpf = estimates_lpf[['timestamp', 'X_est', 'Y_est', 'Z_est']].copy()
+
+    # Rename columns from *_est to *_smooth
+    estimates_lpf = estimates_lpf.rename(columns={
+        'X_est': 'X_smooth',
+        'Y_est': 'Y_smooth',
+        'Z_est': 'Z_smooth'
+    })
+
     
-    # Merge with original estimates
-    final_df = pd.merge(estimated_state_df, smooth_traj_df, on='timestamp', how='left')
+    # Merge with original estimates: timestamp,X_det,Y_det,Z_det,X_est,Y_est,Z_est,X_smooth,Y_smooth,Z_smooth
+    final_df = pd.merge(estimated_state_df, estimates_lpf, 
+                         on='timestamp', how='left')
     
     # Visualization
     fig = plt.figure(figsize=(14, 10)) 
@@ -228,7 +220,7 @@ def main():
     ax.plot(final_df['X_est'], final_df['Y_est'], final_df['Z_est'], 
             c='orange', label='Estimated Trajectory', linewidth=2, alpha=0.5)
     ax.plot(final_df['X_smooth'], final_df['Y_smooth'], final_df['Z_smooth'], 
-            c='red', label='Smoothed Trajectory', linewidth=3)
+             c='red', label='Smoothed Trajectory', linewidth=3)
     
     # Set labels and title
     ax.set_xlabel('Court Length (X)', fontsize=12)

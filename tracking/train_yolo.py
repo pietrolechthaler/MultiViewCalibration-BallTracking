@@ -16,3 +16,4 @@ model.train(
     flipud=0.5,   # Flip verticale
 )
 
+

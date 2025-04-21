@@ -119,8 +119,12 @@ for cam_pair in CAM_PAIRS:
     P2 = load_ProjectionMatrix(cam_id2)
 
     # Extract 2D coordinates from both cameras
-    points2d_cam1 = merged[[f'x_cam{cam_id1}', f'y_cam{cam_id1}']].to_numpy().T  # Shape (2, N)
-    points2d_cam2 = merged[[f'x_cam{cam_id2}', f'y_cam{cam_id2}']].to_numpy().T  # Shape (2, N)
+    points2d_cam1 = merged[[f'x_cam{cam_id1}', f'y_cam{cam_id1}']].to_numpy().astype('float32')
+    points2d_cam2 = merged[[f'x_cam{cam_id2}', f'y_cam{cam_id2}']].to_numpy().astype('float32')
+
+    # Reshape to (1, N, 2) format expected by triangulatePoints
+    points2d_cam1 = points2d_cam1.reshape(1, -1, 2)
+    points2d_cam2 = points2d_cam2.reshape(1, -1, 2)
 
     # Triangulate 3D points from 2D correspondences
     points4d = cv2.triangulatePoints(P1, P2, points2d_cam1, points2d_cam2)
@@ -192,7 +196,7 @@ ax.set_title('3D Ball Detection over Volleyball Court - All Cameras')
 ax.legend()
 
 plt.tight_layout()
-plt.show()
+#plt.show()
 
 # Save the final plot as an image
 fig.savefig(os.path.join(RESULTS_DIR, '3D_ball_detections.png'), dpi=300)

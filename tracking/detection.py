@@ -3,6 +3,7 @@ import cv2
 from pathlib import Path
 import argparse
 import sys
+import math
 
 from utils.parameters import TRAIN_PATH, VIDEO_SUBDIR, COORDS_DIR, START_SEC, END_SEC, WEIGHTS
 
@@ -12,7 +13,6 @@ def setup_directories(base_path):
     video_dir.mkdir(parents=True, exist_ok=True)
     coords_dir.mkdir(parents=True, exist_ok=True)
     return video_dir, coords_dir
-
 
 def select_roi(frame, max_size=1000):
     h, w = frame.shape[:2]
@@ -36,6 +36,8 @@ def select_roi(frame, max_size=1000):
 
     return (x, y, w_roi, h_roi)
 
+def calculate_distance(p1, p2):
+    return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
 
 def sliding_window_detection(frame, model, roi_coords, window_size=(640, 640), overlap=0.1):
     x_roi, y_roi, w_roi, h_roi = roi_coords
@@ -75,7 +77,6 @@ def sliding_window_detection(frame, model, roi_coords, window_size=(640, 640), o
 
     return best_box
 
-
 def process_video(input_path, model, video_dir, coords_dir, camera_id, start_sec, end_sec):
     cap = cv2.VideoCapture(input_path)
     if not cap.isOpened():
@@ -102,6 +103,13 @@ def process_video(input_path, model, video_dir, coords_dir, camera_id, start_sec
 
     cap.set(cv2.CAP_PROP_POS_MSEC, start_sec * 1000)
 
+    # Variabili per il filtro temporale
+    prev_center = None
+    MAX_DISTANCE = 100  # Massima distanza consentita tra frame consecutivi (in pixel)
+    MIN_CONFIDENCE = 0.4  # Confidence minima per considerare una detection valida
+    SKIPPED_FRAMES = 0
+    MAX_SKIPPED_FRAMES = 5  # Numero massimo di frame senza detection accettabile
+
     with open(output_csv_path, 'w') as csv_file:
         csv_file.write("timestamp_sec,x_center,y_center,confidence\n")
 
@@ -115,41 +123,64 @@ def process_video(input_path, model, video_dir, coords_dir, camera_id, start_sec
             if not ret:
                 break
 
-            if camera_id in [2, 12, 13]:
-                best_detection = sliding_window_detection(frame, model, (x_roi, y_roi, w_roi, h_roi))
-                if best_detection:
-                    x1, y1, x2, y2, confidence = best_detection
+            current_detection = None
+            current_confidence = 0
+            exclusion_area = (1160, 900, 1270, 960)
 
-                    x_center = (x1 + x2) / 2
-                    y_center = (y1 + y2) / 2
-                    csv_file.write(f"{current_sec:.2f},{x_center:.2f},{y_center:.2f},{confidence:.4f}\n")
+            roi_frame = frame[y_roi:y_roi+h_roi, x_roi:x_roi+w_roi]
+            results = model.predict(source=roi_frame, conf=0.30)
+            result = results[0]
 
-                    label = f"Volleyball {confidence:.2f}"
+            if len(result.boxes) > 0:
+                best_idx = result.boxes.conf.cpu().numpy().argmax()
+                box = result.boxes.xyxy.cpu().numpy()[best_idx]
+                confidence = result.boxes.conf.cpu().numpy()[best_idx]
+
+                x1, y1, x2, y2 = box
+                x1 += x_roi
+                x2 += x_roi
+                y1 += y_roi
+                y2 += y_roi
+
+                current_detection = (x1, y1, x2, y2)
+                current_confidence = confidence
+
+            # Applica il filtro spaziale/temporale
+            if current_detection and current_confidence >= MIN_CONFIDENCE:
+                x1, y1, x2, y2 = current_detection
+                current_center = ((x1 + x2) / 2, (y1 + y2) / 2)
+
+                if camera_id == 7 and (exclusion_area[0] < current_center[0] < exclusion_area[2] and 
+                           exclusion_area[1] < current_center[1] < exclusion_area[3]):
+                            continue
+                
+                if prev_center is None:
+                    # Prima detection, accettala
+                    accept_detection = True
+                else:
+                    distance = calculate_distance(current_center, prev_center)
+                    max_allowed = MAX_DISTANCE * (1 + SKIPPED_FRAMES * 0.5)  # Aumenta la distanza consentita se abbiamo saltato frame
+                    accept_detection = distance <= max_allowed
+                
+                if accept_detection:
+                    # Detection accettata
+                    csv_file.write(f"{current_sec:.2f},{current_center[0]:.2f},{current_center[1]:.2f},{current_confidence:.4f}\n")
+                    label = f"Volleyball {current_confidence:.2f}"
                     cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 3)
                     cv2.putText(frame, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 2)
+                    prev_center = current_center
+                    SKIPPED_FRAMES = 0
+                else:
+                    # Detection scartata (troppo lontana)
+                    SKIPPED_FRAMES += 1
             else:
-                roi_frame = frame[y_roi:y_roi+h_roi, x_roi:x_roi+w_roi]
-                results = model.predict(source=roi_frame, conf=0.30)
-                result = results[0]
+                # Nessuna detection o confidence troppo bassa
+                SKIPPED_FRAMES += 1
 
-                if len(result.boxes) > 0:
-                    best_idx = result.boxes.conf.cpu().numpy().argmax()
-                    box = result.boxes.xyxy.cpu().numpy()[best_idx]
-                    confidence = result.boxes.conf.cpu().numpy()[best_idx]
-
-                    x1, y1, x2, y2 = box
-                    x1 += x_roi
-                    x2 += x_roi
-                    y1 += y_roi
-                    y2 += y_roi
-
-                    x_center = (x1 + x2) / 2
-                    y_center = (y1 + y2) / 2
-                    csv_file.write(f"{current_sec:.2f},{x_center:.2f},{y_center:.2f},{confidence:.4f}\n")
-
-                    label = f"Volleyball {confidence:.2f}"
-                    cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 3)
-                    cv2.putText(frame, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 2)
+            # Se abbiamo saltato troppi frame, resetta la posizione precedente
+            if SKIPPED_FRAMES > MAX_SKIPPED_FRAMES:
+                prev_center = None
+                SKIPPED_FRAMES = 0
 
             out.write(frame)
 
@@ -159,7 +190,6 @@ def process_video(input_path, model, video_dir, coords_dir, camera_id, start_sec
 
     print(f"Video saved to: {output_video_path}")
     print(f"Coordinates saved to: {output_csv_path}")
-
 
 def main(camera_id, start_sec, end_sec):
     try:
@@ -175,7 +205,6 @@ def main(camera_id, start_sec, end_sec):
     except Exception as e:
         print(f"Error processing camera {camera_id}: {str(e)}", file=sys.stderr)
         sys.exit(1)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

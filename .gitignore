@@ -6,6 +6,4 @@ src-gen/
 __pycache__/
 env/
 tracking/datasets
-tracking/runs/detect/train2
-tracking/tndataset
 tracking/yolo11n.pt
