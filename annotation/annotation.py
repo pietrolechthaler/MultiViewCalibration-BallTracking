@@ -111,10 +111,10 @@ class CoordinateSaver:
     def save_to_file(self):
         # Create the output filename
         base_name = os.path.splitext(os.path.basename(self.image_path))[0]
-        output_filename = f"annotation/annotation-dist/{base_name}-ann.json"
+        output_filename = f"annotation-dist/{base_name}-ann.json"
 
         # Ensure the output directory exists
-        os.makedirs("annotation/annotation-dist", exist_ok=True)
+        os.makedirs("annotation-dist", exist_ok=True)
 
         # Save the coordinates data to a JSON file
         with open(output_filename, 'w') as json_file:
@@ -128,7 +128,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Construct the image path based on the input number
-    image_path = f"annotation/annotation-images/out{args.number}.jpg"  # Adjust the filename pattern as needed
+    image_path = f"annotation-images/out{args.number}.jpg"  
 
     # Check if the image file exists
     if not os.path.isfile(image_path):
