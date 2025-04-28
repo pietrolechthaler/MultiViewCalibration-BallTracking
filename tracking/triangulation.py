@@ -8,8 +8,6 @@ from mpl_toolkits.mplot3d import Axes3D
 
 from utils.parameters import TRACKING_FOLDER, CAM_PAIRS, COURT_LENGTH, COURT_WIDTH, NET_HEIGHT, NET_WIDTH, START_SEC, END_SEC, RESULTS_DIR
 
-
-
 def draw_volleyball_court(ax):
     """Draw a 3D volleyball court on the given matplotlib axis"""
     hl = COURT_LENGTH / 2  # half length
@@ -164,6 +162,7 @@ for cam_pair in CAM_PAIRS:
 
 # Sort the final combined CSV file by timestamp
 df = pd.read_csv(os.path.join(RESULTS_DIR, f'coords_3d_all.csv'))
+
 # Remove rows with TIMESTAMP_SEC < START_SEC or > END_SEC
 df = df[(df['timestamp_sec'] >= START_SEC) & (df['timestamp_sec'] <= END_SEC)]
 df = df.sort_values(by='timestamp_sec')

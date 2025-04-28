@@ -11,7 +11,6 @@ from utils.parameters import COURT_LENGTH, COURT_WIDTH, NET_HEIGHT, NET_WIDTH, R
 TRACKING_DIR = "tracking/"
 outlier_threshold = 4.0  # Threshold for outlier detection in meters
 
-
 from scipy.signal import butter, filtfilt
 import pandas as pd
 import numpy as np
