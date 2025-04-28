@@ -17,8 +17,8 @@ To ensure compatibility and reproducibility, this project requires Python and th
 1. Clone the Repository to your local machine
 
 ```bash
-git clone https://github.com/
-cd nome/
+git clone https://github.com/pietrolechthaler/MultiViewCalibration-BallTracking.git
+cd MultiViewCalibration-BallTracking/
 ```
 
 2. Create a virtual environment
