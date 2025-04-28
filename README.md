@@ -73,13 +73,13 @@ Open your web browser and go to http://127.0.0.1:5000/ to access the 3D Reconstr
 
 
 ### Ball detection and 3D position estimation
-![viewer](readme/detection.jpg)
+![detection](readme/detection.gif)
 
 To run the ball detection script, use the following command:
 ```bash
 ./detection.sh
 ```
-![viewer](readme/tracking.jpg)
+![tracking](readme/tracking.jpg)
 
 Once the ball detection process is complete, you can proceed to run the 3D tracking script with the following command:
 ```bash
