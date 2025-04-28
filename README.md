@@ -1,51 +1,14 @@
-# 3D Camera Calibration (Geometry and 3D Reconstruction)
-
+# Multi-view calibration and 3D ball tracking
 ## Description
+
+This repository presents a tool for `3D volleyball court reconstruction and ball tracking` using a multi-camera system composed of 10 synchronized cameras strategically positioned around the court. The proposed pipeline integrates intrinsic and extrinsic camera calibration. Intrinsic calibration estimates each camera’s focal length, principal point, and lens distortion to correct image deformations, while extrinsic calibration determines the cameras’ positions and orientations within a shared 3D coordinate system.
+For `intrinsic calibration`, the official OpenCV Calibration Method is employed with a checkerboard pattern. `Extrinsic parameters` are optimized using Perspective-n-Point (PnP) algorithms and bundle adjustment by matching key-points across multiple views.
+By combining these calibrations with multi-view geometry and deep learning-based ball detection (`YOLOv11`), the system achieves robust 3D localization of the volleyball, even under challenging conditions such as occlusions and rapid motion. 
+To model trajectory dynamics, a `particle filter` is implemented, incorporating physics-based motion priors to enable accurate predictions during brief detection dropouts. The estimated trajectory is further refined using a low-pass filter.
 
 
 ![cover](readme/cover.jpg)
 
-## Repository Structure
-
-```python
-3D-camera-calibration/
-├── readme/                # Readme images
-├── report/                # Project Report
-├── calibration/           # Calibration scripts
-│   ├── preprocessing.py
-│   ├── intrinsic.py 
-│   ├── extrinsic.py
-│   ├── undistort.py
-│   └── utils/ 
-│       ├── calibration_utils.py 
-│       └── parameters.py 
-├── annotation/            # Annotation scripts
-│   ├── preprocessing.py
-│   ├── intrinsic.py 
-│   ├── extrinsic.py
-│   ├── undistort.py
-│   └── utils/ 
-│       ├── calibration_utils.py 
-│       └── parameters.py 
-├── viewer/                # Tool
-│   ├── app.py
-│   ├── static/ 
-│   │   ├── images/ 
-│   │   ├── style.css 
-│   │   └── court.jpg 
-│   ├── homography/ 
-│   │   └── homography.py 
-│   └── templates/ 
-│       └── index.html 
-├── video/                  # Video
-│   ├── board/
-│   └── match/ 
-│  
-├── requirements.txt
-├── README.md
-└── LICENSE
-
-```
 
 ## Environment Setup
 
@@ -69,6 +32,10 @@ python -m venv env
 ```bash
 source venv/bin/activate # MacOS and Linux
 venv\Scripts\activate # Windows
+```
+
+```bash
+pip install -r requirements.txt
 ```
 
 ## Usage
@@ -97,9 +64,21 @@ Make sure to check the output for any errors and verify that the calibration res
 ### 3D Reconstruction Viewer
 To start the 3D Reconstruction Viewer tool:
 ```bash
-python3 viewer/app.py
+./viewer_linux.sh # MacOS and Linux
+./viewer_windows.sh # Windows
 ```
 Open your web browser and go to http://127.0.0.1:5000/ to access the 3D Reconstruction Viewer. 
+
+
+### Ball detection and 3D position estimation
+To run the ball detection script, use the following command:
+```bash
+./detection.sh
+```
+Once the ball detection process is complete, you can proceed to run the 3D tracking script with the following command:
+```bash
+./tracking.sh
+```
 
 
 
