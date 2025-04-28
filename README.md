@@ -30,8 +30,8 @@ python -m venv env
 3. Activate the virtual environment and install the required packages
 
 ```bash
-source venv/bin/activate # MacOS and Linux
-venv\Scripts\activate # Windows
+source env/bin/activate # MacOS and Linux
+env\Scripts\activate # Windows
 ```
 
 ```bash
