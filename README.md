@@ -62,6 +62,8 @@ After extracting the frames, you can run the intrinsic and extrinsic calibration
 Make sure to check the output for any errors and verify that the calibration results are as expected.
 
 ### 3D Reconstruction Viewer
+![viewer](readme/viewer.jpg)
+
 To start the 3D Reconstruction Viewer tool:
 ```bash
 ./viewer_linux.sh # MacOS and Linux
@@ -71,10 +73,14 @@ Open your web browser and go to http://127.0.0.1:5000/ to access the 3D Reconstr
 
 
 ### Ball detection and 3D position estimation
+![viewer](readme/detection.jpg)
+
 To run the ball detection script, use the following command:
 ```bash
 ./detection.sh
 ```
+![viewer](readme/tracking.jpg)
+
 Once the ball detection process is complete, you can proceed to run the 3D tracking script with the following command:
 ```bash
 ./tracking.sh
