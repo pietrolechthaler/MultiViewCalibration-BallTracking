@@ -94,5 +94,5 @@ Once the ball detection process is complete, you can proceed to run the 3D track
 Ylenia Graziadei, Pietro Lechthaler
 
 The project has been built and tested on the following systems:
-- Windows 11 Pro, Python 
+- Windows 11 Pro, Python 3.10.14
 - Ubuntu 24.10, Python 3.12.7
